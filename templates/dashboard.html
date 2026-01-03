@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <!-- @formatter:off -->
+    <style>
+         {{ css_content }}
+    </style>
+    <!-- @formatter:on -->
+</head>
+
+<body>
+    <!-- Weather Panel -->
+    <div class="weather-panel">
+        <div class="weather-top-panel">
+            <div class="weather-panel-title">
+                <div class="location">{{ weather.city }}</div>
+                <div class="date-time">
+                    {{ weather.date }} {{ weather.time }}
+                </div>
+            </div>
+            <div class="current-weather">
+                <div class="weather-main">
+                    <img src="{{ weather.icon }}" alt="Weather" class="weather-icon">
+                    <div class="temp-container">
+                        <div>
+                            <span class="temp-display">{{ weather.temp }}</span><span
+                                class="temp-display-unit">°C</span>
+                        </div>
+                        <div class="feels-like">Feels like {{ weather.feels_like }}°</div>
+                    </div>
+                </div>
+                <div class="weather-details-grid">
+                    <div><img src="{{ weather.humidity_icon }}" class="detail-icon"> {{ weather.humidity }}%</div>
+                    <div><img src="{{ weather.wind_icon }}" class="detail-icon"> {{ weather.wind }} m/s</div>
+                    <div><img src="{{ weather.sunrise_icon }}" class="detail-icon"> {{ weather.sunrise }}</div>
+                    <div><img src="{{ weather.pressure_icon }}" class="detail-icon"> {{ weather.pressure }} hPa</div>
+                    <div><img src="{{ weather.aqi_icon }}" class="detail-icon"> {{ weather.airquality }}</div>
+                    <div><img src="{{ weather.sunset_icon }}" class="detail-icon"> {{ weather.sunset }}</div>
+                </div>
+            </div>
+
+            <div class="hourly-graph">
+                <svg class="graph-line-overlay">
+                    <polyline points="
+                        {% for hour in weather.hourly -%}
+                        {{ (loop.index0 + 0.5) / 8 * 100 }}%,{{ 100 - hour.temp_position }}%{% if not loop.last %} {% endif %}
+                        {%- endfor %}
+                    " />
+                </svg>
+                {% for hour in weather.hourly %}
+                <div class="hour-column">
+                    <div class="temp-label">{{ hour.temp }}°</div>
+                    <div class="graph-container">
+                        <div class="graph-point" style="bottom: {{ hour.temp_position }}%;"></div>
+                    </div>
+                    <div class="rain-label">{{ hour.rain }}%</div>
+                    <div class="hour-label">{{ hour.hour }}:00</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="forecast-section">
+            <div class="forecast-days">
+                {% for day in weather.forecast %}
+                <div class="forecast-day">
+                    <div class="day-name">{{ day.name }}</div>
+                    <img src="{{ day.icon }}" alt="Weather" class="day-icon">
+                    <div class="day-temp">{{ day.max }}° / {{ day.min }}°</div>
+                    <div class="moon-phase-day">
+                        <img src="{{ day.moon_icon }}" class="moon-icon"> {{ day.moon_phase }}%
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Strava Panel -->
+    <div class="strava-panel">
+        {% for run in runs %}
+        <div class="run-entry">
+            <div class="run-stats">
+                <div class="date"><img src="{{ run.activity_icon }}" class="activity-icon"> {{ run.date }}</div>
+                <div class="run-indicator" style="background-color: {{ run.color }};"></div>
+                <div class="stat"><img src="{{ run.distance_icon }}" class="stat-icon"> {{ run.distance }}</div>
+                <div class="stat"><img src="{{ run.duration_icon }}" class="stat-icon"> {{ run.duration }}</div>
+                <div class="stat"><img src="{{ run.pace_icon }}" class="stat-icon"> {{ run.pace }}</div>
+                <div class="stat"><img src="{{ run.elevation_icon }}" class="stat-icon"> {{ run.elevation }}</div>
+            </div>
+            <div class="run-map">
+                {% if run.map_path %}
+                <img src="{{ run.map_path }}" alt="Run map">
+                {% else %}
+                <div class="no-data">No GPS data</div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>

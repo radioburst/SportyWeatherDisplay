@@ -1,0 +1,14 @@
+{
+    "strava": {
+        "client_id": "",
+        "client_secret": "",
+        "access_token": "",
+        "refresh_token": "",
+        "expires_at": 1767456157
+    },
+    "openweather": {
+        "api_key": "",
+        "city": "Vienna,AT",
+        "units": "metric"
+    }
+}
