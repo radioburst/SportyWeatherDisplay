@@ -63,7 +63,8 @@ def refresh_access_token():
 
 def get_stat_icon(icon_name):
     """Convert stat icon to base64 data URI"""
-    icon_path = os.path.join(os.path.dirname(__file__), 'icons', f'{icon_name}.png')
+    # Icons are in project root icons/ folder
+    icon_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'icons', f'{icon_name}.png')
     if os.path.exists(icon_path):
         with open(icon_path, 'rb') as f:
             img_data = f.read()

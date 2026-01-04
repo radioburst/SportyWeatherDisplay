@@ -9,7 +9,8 @@ import os
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 480
 OUTPUT_FILE = "eink_display_preview.png"
-TEST_MODE = os.environ.get('TEST_MODE', 'true').lower() == 'true'
+# Default to false - will push to display unless explicitly set to 'true'
+TEST_MODE = os.environ.get('TEST_MODE', 'false').lower() == 'true'
 
 def create_dashboard_html():
     """Create the dashboard using HTML templates"""
@@ -67,7 +68,10 @@ def main():
             '--no-sandbox',
             '--disable-dev-shm-usage',
             '--disable-software-rasterizer',
-            '--disable-extensions'
+            '--disable-extensions',
+            '--disable-features=NetworkService',
+            '--disable-background-networking',
+            '--disable-sync'
         ]
     )
     hti.screenshot(

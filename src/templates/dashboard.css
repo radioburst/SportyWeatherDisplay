@@ -293,8 +293,8 @@ body {
     margin-bottom: 3px;
     display: flex;
     align-items: center;
-    gap: 4px;
-    margin-left: 0px;
+    gap: 10px;
+    margin-left: 5px;
 }
 
 .activity-icon {
@@ -317,7 +317,7 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: 0px;
+    margin-left: 5px;
 }
 
 .run-stats .stat:last-child {
