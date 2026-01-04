@@ -71,7 +71,10 @@ def main():
             '--disable-extensions',
             '--disable-features=NetworkService',
             '--disable-background-networking',
-            '--disable-sync'
+            '--disable-sync',
+            '--force-device-scale-factor=1',  # Disable any scaling
+            '--font-render-hinting=none',  # Disable font hinting
+            '--disable-lcd-text'  # Disable subpixel rendering
         ]
     )
     hti.screenshot(
@@ -80,10 +83,24 @@ def main():
         size=(DISPLAY_WIDTH, DISPLAY_HEIGHT + 120)  # Render extra height
     )
     
-    # Crop to exact size
+    # Crop to exact size and convert to palette mode for cleaner colors
     img = PILImage.open(temp_file)
     img_cropped = img.crop((0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT))
-    img_cropped.save(output_file)
+    
+    # Convert to RGB first (in case it's RGBA), then to palette mode
+    # This reduces color variations and makes it more suitable for e-ink
+    if img_cropped.mode == 'RGBA':
+        # Create white background for transparent areas
+        background = PILImage.new('RGB', img_cropped.size, 'white')
+        background.paste(img_cropped, mask=img_cropped.split()[3])  # Use alpha channel as mask
+        img_cropped = background
+    
+    # Convert to palette mode with adaptive colors (will reduce to distinct colors)
+    # This eliminates anti-aliasing artifacts by forcing discrete colors
+    img_palette = img_cropped.convert('P', palette=PILImage.ADAPTIVE, colors=256)
+    img_palette = img_palette.convert('RGB')  # Convert back to RGB for display
+    
+    img_palette.save(output_file, optimize=False)  # Disable optimization to avoid quality loss
     
     # Clean up temp file
     if os.path.exists(temp_file):

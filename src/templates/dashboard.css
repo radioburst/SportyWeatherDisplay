@@ -7,6 +7,10 @@
 html {
     width: 800px;
     height: 480px;
+    /* Disable anti-aliasing for e-ink display */
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
+    text-rendering: optimizeSpeed;
 }
 
 body {
@@ -16,6 +20,11 @@ body {
     display: flex;
     background: white;
     overflow: hidden;
+    /* Crisp edges for all images and elements */
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
+    -webkit-font-smoothing: none;
+    -moz-osx-font-smoothing: unset;
 }
 
 /* Left Panel - Weather */
