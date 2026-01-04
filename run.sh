@@ -10,6 +10,26 @@ if [ ! -f "settings.json" ]; then
     exit 1
 fi
 
+# Install system dependencies on Raspberry Pi
+if [ -f /etc/rpi-issue ]; then
+    echo "🔧 Checking system dependencies..."
+    REQUIRED_PKGS="libopenjp2-7 libtiff5 libwebp7 chromium-browser chromium-chromedriver"
+    INSTALL_NEEDED=false
+    
+    for pkg in $REQUIRED_PKGS; do
+        if ! dpkg -l | grep -q "^ii  $pkg "; then
+            INSTALL_NEEDED=true
+            break
+        fi
+    done
+    
+    if [ "$INSTALL_NEEDED" = true ]; then
+        echo "Installing required system packages..."
+        sudo apt update
+        sudo apt install -y $REQUIRED_PKGS
+    fi
+fi
+
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
     echo "📦 Creating virtual environment..."
