@@ -30,13 +30,26 @@ Displays weather forecasts and your recent Strava activities on an e-ink display
 
 ### Raspberry Pi Deployment
 
-See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions using Podman and systemd.
+See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 
-Quick deploy:
-```bash
-export RPI_HOST=raspberrypi.local
-./deploy/deploy.sh
-```
+**Quick Start:**
+
+1. **On your Raspberry Pi:**
+   ```bash
+   # Clone the repository
+   git clone https://github.com/YOUR_USERNAME/SportyWeatherDisplay.git
+   cd SportyWeatherDisplay
+   
+   # Configure your settings
+   cp settings.example.json settings.json
+   nano settings.json
+   
+   # Deploy
+   chmod +x deploy/deploy.sh
+   ./deploy/deploy.sh
+   ```
+
+2. **Done!** Your dashboard will update automatically every 15 minutes.
 
 ## Project Structure
 

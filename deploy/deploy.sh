@@ -1,21 +1,23 @@
 #!/bin/bash
 # Deployment script for Sporty Weather Display on Raspberry Pi
+# Run this script ON the Raspberry Pi after cloning the repo
 
 set -e
 
 echo "🚀 Deploying Sporty Weather Display to Raspberry Pi"
 echo "=================================================="
 
-# Configuration
-RPI_USER="${RPI_USER:-pi}"
-RPI_HOST="${RPI_HOST:-raspberrypi.local}"
-PROJECT_NAME="sporty-weather-display"
-
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
+
+PROJECT_NAME="sporty-weather-display"
+
+# Get the project root directory (parent of deploy/)
+PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$PROJECT_ROOT"
 
 # Check if settings.json exists
 if [ ! -f "settings.json" ]; then
@@ -24,65 +26,50 @@ if [ ! -f "settings.json" ]; then
     exit 1
 fi
 
-# Build the container
+# Check if podman is installed
+if ! command -v podman &> /dev/null; then
+    echo -e "${RED}❌ Error: podman not found${NC}"
+    echo "Install podman with: sudo apt install -y podman"
+    exit 1
+fi
+
+# Build the container image
 echo -e "${YELLOW}📦 Building container image...${NC}"
 podman build -t ${PROJECT_NAME}:latest -f deploy/Containerfile .
 
-# Save the container image to a tar file
-echo -e "${YELLOW}💾 Saving container image...${NC}"
-podman save -o ${PROJECT_NAME}.tar localhost/${PROJECT_NAME}:latest
+# Create config directory
+echo -e "${YELLOW}📁 Setting up configuration...${NC}"
+mkdir -p ~/.config/sporty-weather/output
 
-# Copy files to Raspberry Pi
-echo -e "${YELLOW}📤 Copying files to Raspberry Pi...${NC}"
-ssh ${RPI_USER}@${RPI_HOST} "mkdir -p ~/.config/sporty-weather"
-scp settings.json ${RPI_USER}@${RPI_HOST}:~/.config/sporty-weather/
-scp ${PROJECT_NAME}.tar ${RPI_USER}@${RPI_HOST}:/tmp/
-scp deploy/sporty-weather.service ${RPI_USER}@${RPI_HOST}:/tmp/
-scp deploy/sporty-weather.timer ${RPI_USER}@${RPI_HOST}:/tmp/
+# Copy settings.json
+cp settings.json ~/.config/sporty-weather/
 
-# Deploy on Raspberry Pi
-echo -e "${YELLOW}🔧 Setting up on Raspberry Pi...${NC}"
-ssh ${RPI_USER}@${RPI_HOST} << 'ENDSSH'
-    set -e
-    
-    # Load the container image
-    echo "Loading container image..."
-    podman load -i /tmp/sporty-weather-display.tar
-    
-    # Create output directory
-    mkdir -p ~/.config/sporty-weather/output
-    
-    # Install systemd service files
-    mkdir -p ~/.config/systemd/user/
-    mv /tmp/sporty-weather.service ~/.config/systemd/user/
-    mv /tmp/sporty-weather.timer ~/.config/systemd/user/
-    
-    # Reload systemd
-    systemctl --user daemon-reload
-    
-    # Enable and start the timer
-    systemctl --user enable sporty-weather.timer
-    systemctl --user start sporty-weather.timer
-    
-    # Enable lingering to allow user services to run without login
-    loginctl enable-linger $USER
-    
-    # Clean up
-    rm /tmp/sporty-weather-display.tar
-    
-    echo "✅ Deployment complete!"
-    echo "Timer status:"
-    systemctl --user status sporty-weather.timer --no-pager
-ENDSSH
+# Install systemd service files
+echo -e "${YELLOW}🔧 Installing systemd services...${NC}"
+mkdir -p ~/.config/systemd/user/
+cp deploy/sporty-weather.service ~/.config/systemd/user/
+cp deploy/sporty-weather.timer ~/.config/systemd/user/
 
-# Clean up local tar file
-rm ${PROJECT_NAME}.tar
+# Reload systemd
+systemctl --user daemon-reload
+
+# Enable and start the timer
+echo -e "${YELLOW}⏰ Enabling systemd timer...${NC}"
+systemctl --user enable sporty-weather.timer
+systemctl --user start sporty-weather.timer
+
+# Enable lingering to allow user services to run without login
+loginctl enable-linger $USER
 
 echo -e "${GREEN}✨ Deployment successful!${NC}"
 echo ""
-echo "Useful commands on the Raspberry Pi:"
+echo "The dashboard will update every 15 minutes automatically."
+echo ""
+echo "Useful commands:"
 echo "  - Check timer status:     systemctl --user status sporty-weather.timer"
 echo "  - Check service status:   systemctl --user status sporty-weather.service"
 echo "  - View logs:              journalctl --user -u sporty-weather.service -f"
-echo "  - Run manually:           systemctl --user start sporty-weather.service"
-echo "  - Stop timer:             systemctl --user stop sporty-weather.timer"
+echo "  - Run manually now:       systemctl --user start sporty-weather.service"
+echo "  - Stop automatic updates: systemctl --user stop sporty-weather.timer"
+echo ""
+echo "Output images will be in: ~/.config/sporty-weather/output/"

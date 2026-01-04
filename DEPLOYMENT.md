@@ -19,100 +19,59 @@ This approach is best practice because:
 
 ### On your Raspberry Pi:
 ```bash
-# Install Podman
+# Install Podman and git
 sudo apt update
-sudo apt install -y podman
+sudo apt install -y podman git
 
 # Ensure SPI is enabled for e-ink display
 sudo raspi-config
 # Navigate to: Interface Options → SPI → Enable
 ```
 
-### On your development machine:
-- Podman installed
-- SSH access to your Raspberry Pi
-- `settings.json` configured with your API keys
-
-## Configuration
-
-1. Copy the example settings file:
-```bash
-cp settings.example.json settings.json
-```
-
-2. Edit `settings.json` with your credentials:
-   - OpenWeather API key
-   - Strava API credentials
-   - Location details
-
 ## Deployment
 
-### Automated Deployment
-
-Use the provided deployment script:
+### 1. Clone the Repository on Your Raspberry Pi
 
 ```bash
-# Set your Raspberry Pi details (or use defaults)
-export RPI_USER=pi
-export RPI_HOST=raspberrypi.local
-
-# Run the deployment script
-./deploy.sh
-```
-
-This script will:
-1. Build the container image locally
-2. Transfer it to your Raspberry Pi
-3. Set up systemd service and timer
-4. Start the automatic updates
-
-### Manual Deployment
-
-If you prefer to deploy manually:
-
-#### 1. Build the container
-```bash
-podman build -t sporty-weather-display:latest -f deploy/Containerfile .
-```
-
-#### 2. Transfer to Raspberry Pi
-```bash
-# Save and transfer the image
-podman save -o sporty-weather-display.tar localhost/sporty-weather-display:latest
-scp sporty-weather-display.tar pi@raspberrypi.local:/tmp/
-
-# Load on the Raspberry Pi
+# SSH into your Raspberry Pi
 ssh pi@raspberrypi.local
-podman load -i /tmp/sporty-weather-display.tar
+
+# Clone the repository
+cd ~
+git clone https://github.com/YOUR_USERNAME/SportyWeatherDisplay.git
+cd SportyWeatherDisplay
 ```
 
-#### 3. Set up configuration on Raspberry Pi
+### 2. Configure Settings
+
 ```bash
-# Create config directory
-mkdir -p ~/.config/sporty-weather
+# Copy the example settings
+cp settings.example.json settings.json
 
-# Copy settings.json (from your dev machine)
-scp settings.json pi@raspberrypi.local:~/.config/sporty-weather/
+# Edit with your API keys
+nano settings.json
 ```
 
-#### 4. Install systemd services
+Add your:
+- OpenWeather API key (get from [openweathermap.org/api](https://openweathermap.org/api))
+- Strava API credentials (create app at [strava.com/settings/api](https://www.strava.com/settings/api))
+- Location details (latitude/longitude)
+
+### 3. Run the Deployment Script
+
 ```bash
-# Copy service files to Raspberry Pi
-scp sporty-weather.service sporty-weather.timer pi@raspberrypi.local:/tmp/
+# Make the script executable
+chmod +x deploy/deploy.sh
 
-# On the Raspberry Pi, install them
-ssh pi@raspberrypi.local
-mkdir -p ~/.config/systemd/user/
-mv /tmp/sporty-weather.* ~/.config/systemd/user/
-
-# Reload systemd and enable services
-systemctl --user daemon-reload
-systemctl --user enable sporty-weather.timer
-systemctl --user start sporty-weather.timer
-
-# Enable lingering (allows services to run without being logged in)
-loginctl enable-linger $USER
+# Run the deployment
+./deploy/deploy.sh
 ```
+
+That's it! The script will:
+1. Build the container image
+2. Set up systemd service and timer
+3. Start automatic updates every 15 minutes
+4. Enable lingering so it runs even when you're not logged in
 
 ## Management Commands
 
@@ -174,10 +133,20 @@ systemctl --user restart sporty-weather.timer
 
 ### Update the Container
 
-To deploy new code:
-1. Make your changes locally
-2. Run `./deploy.sh` again
-3. The new container will be used on the next scheduled run
+To deploy new code after making changes:
+
+```bash
+# On your Raspberry Pi
+cd ~/SportyWeatherDisplay
+
+# Pull latest changes
+git pull
+
+# Re-run the deployment script
+./deploy/deploy.sh
+```
+
+The new container will be used on the next scheduled run (or run manually with `systemctl --user start sporty-weather.service`).
 
 ## Troubleshooting
 
