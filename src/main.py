@@ -58,49 +58,91 @@ def main():
     temp_file = os.path.join(output_dir, "temp_render.png")
     output_file = os.path.join(output_dir, OUTPUT_FILE)
     
-    # Render HTML to image at larger size to avoid bottom margin issue
-    # Configure for headless operation (no X server needed)
-    hti = Html2Image(
-        output_path=output_dir,
-        custom_flags=[
-            '--headless',
-            '--disable-gpu',
-            '--no-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-software-rasterizer',
-            '--disable-extensions',
-            '--disable-features=NetworkService',
-            '--disable-background-networking',
-            '--disable-sync',
-            '--force-device-scale-factor=1',  # Disable any scaling
-            '--font-render-hinting=none',  # Disable font hinting
-            '--disable-lcd-text'  # Disable subpixel rendering
-        ]
-    )
-    hti.screenshot(
-        html_str=html_content,
-        save_as="temp_render.png",
-        size=(DISPLAY_WIDTH, DISPLAY_HEIGHT + 120)  # Render extra height
-    )
+    # Set fontconfig environment variable to disable anti-aliasing on Linux
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    os.environ['FONTCONFIG_FILE'] = os.path.join(project_root, 'fonts.conf')
     
-    # Crop to exact size and convert to palette mode for cleaner colors
+    # Detect if we are running in a display environment (like Xvfb or Desktop)
+    # If a display is available, we can disable headless mode for better font rendering
+    has_display = 'DISPLAY' in os.environ or 'WAYLAND_DISPLAY' in os.environ
+    
+    # Fallback for RPi Desktop: If running via SSH or Service, DISPLAY might be missing
+    # but the X server is usually running on :0
+    if not has_display and os.path.exists('/tmp/.X11-unix/X0'):
+        os.environ['DISPLAY'] = ':0'
+        has_display = True
+        print("Detected local X11 server on :0, using it for better font rendering")
+    
+    # Render HTML to image at native resolution
+    # Simplified flags for Raspberry Pi 4
+    chrome_flags = [
+        '--no-sandbox',
+        '--disable-gpu',
+        '--disable-dev-shm-usage',
+        '--force-device-scale-factor=1',
+        '--window-size=800,800',
+        '--hide-scrollbars',
+        '--mute-audio',
+        '--no-first-run',
+        '--disable-setuid-sandbox'
+    ]
+    
+    if not has_display:
+        chrome_flags.append('--headless')
+        print("No display detected, using --headless mode")
+    else:
+        display_val = os.environ.get('DISPLAY') or os.environ.get('WAYLAND_DISPLAY')
+        print(f"Display detected ({display_val}), disabling --headless for better font rendering")
+
+    # Try to find chromium executable
+    browser_path = None
+    for path in ['/usr/bin/chromium-browser', '/usr/bin/chromium', '/usr/bin/google-chrome']:
+        if os.path.exists(path):
+            browser_path = path
+            break
+    
+    if browser_path:
+        print(f"Using browser: {browser_path}")
+        hti = Html2Image(
+            browser_executable=browser_path,
+            output_path=output_dir,
+            custom_flags=chrome_flags
+        )
+    else:
+        hti = Html2Image(
+            output_path=output_dir,
+            custom_flags=chrome_flags
+        )
+
+    print("Rendering dashboard to image...")
+    try:
+        hti.screenshot(
+            html_str=html_content,
+            save_as="temp_render.png",
+            size=(DISPLAY_WIDTH, DISPLAY_HEIGHT + 120)
+        )
+    except Exception as e:
+        print(f"❌ Rendering error: {e}")
+
+    # Check if file was actually created
+    if not os.path.exists(temp_file):
+        print(f"❌ Error: Screenshot failed! {temp_file} was not created.")
+        return
+
+    # Crop to exact size
     img = PILImage.open(temp_file)
     img_cropped = img.crop((0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT))
     
-    # Convert to RGB first (in case it's RGBA), then to palette mode
-    # This reduces color variations and makes it more suitable for e-ink
+    # Convert to RGB first (in case it's RGBA)
     if img_cropped.mode == 'RGBA':
         # Create white background for transparent areas
         background = PILImage.new('RGB', img_cropped.size, 'white')
         background.paste(img_cropped, mask=img_cropped.split()[3])  # Use alpha channel as mask
         img_cropped = background
+    elif img_cropped.mode != 'RGB':
+        img_cropped = img_cropped.convert('RGB')
     
-    # Convert to palette mode with adaptive colors (will reduce to distinct colors)
-    # This eliminates anti-aliasing artifacts by forcing discrete colors
-    img_palette = img_cropped.convert('P', palette=PILImage.ADAPTIVE, colors=256)
-    img_palette = img_palette.convert('RGB')  # Convert back to RGB for display
-    
-    img_palette.save(output_file, optimize=False)  # Disable optimization to avoid quality loss
+    img_cropped.save(output_file, optimize=False)
     
     # Clean up temp file
     if os.path.exists(temp_file):

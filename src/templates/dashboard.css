@@ -9,12 +9,13 @@ html {
     height: 480px;
     /* Disable anti-aliasing for e-ink display */
     -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: unset;
-    text-rendering: optimizeSpeed;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: geometricPrecision;
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+    font-family: 'DejaVu Sans', sans-serif;
+    font-weight: 500;
     width: 800px;
     height: 480px;
     display: flex;
@@ -24,7 +25,7 @@ body {
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     -webkit-font-smoothing: none;
-    -moz-osx-font-smoothing: unset;
+    -moz-osx-font-smoothing: none;
 }
 
 /* Left Panel - Weather */
@@ -59,7 +60,7 @@ body {
 }
 
 .date-time {
-    font-size: 13px;
+    font-size: 14px;
     color: black;
     margin-left: 20px;
 }
@@ -112,12 +113,12 @@ body {
 }
 
 .feels-like {
-    font-size: 12px;
+    font-size: 14px;
     margin-top: 4px;
 }
 
 .weather-details-grid {
-    font-size: 13px;
+    font-size: 14px;
     color: black;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -125,8 +126,8 @@ body {
 }
 
 .detail-icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     vertical-align: middle;
     margin-right: 4px;
 }
@@ -164,7 +165,7 @@ body {
 }
 
 .temp-label {
-    font-size: 12px;
+    font-size: 14px;
     text-align: center;
     grid-row: 1;
 }
@@ -187,14 +188,14 @@ body {
 }
 
 .rain-label {
-    font-size: 12px;
+    font-size: 14px;
     color: #3b82f6;
     text-align: center;
     grid-row: 3;
 }
 
 .hour-label {
-    font-size: 12px;
+    font-size: 14px;
     color: #666;
     text-align: center;
     grid-row: 4;
@@ -232,19 +233,19 @@ body {
 }
 
 .forecast-day .day-icon {
-    width: 45px;
-    height: 45px;
+    width: 48px;
+    height: 48px;
     margin-bottom: 8px;
     align-self: center;
 }
 
 .forecast-day .day-temp {
-    font-size: 13px;
+    font-size: 14px;
     margin-bottom: 12px;
 }
 
 .moon-phase-day {
-    font-size: 13px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -252,8 +253,8 @@ body {
 }
 
 .moon-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     vertical-align: middle;
 }
 
@@ -307,8 +308,8 @@ body {
 }
 
 .activity-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
 }
 
@@ -320,7 +321,7 @@ body {
 }
 
 .run-stats .stat {
-    font-size: 13px;
+    font-size: 14px;
     color: black;
     margin-bottom: 8px;
     display: flex;
@@ -334,8 +335,8 @@ body {
 }
 
 .stat-icon {
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     flex-shrink: 0;
     vertical-align: middle;
     margin-right: 4px;
@@ -364,6 +365,6 @@ body {
 
 .no-data {
     color: #999;
-    font-size: 13px;
+    font-size: 14px;
     text-align: center;
 }

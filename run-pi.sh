@@ -30,17 +30,20 @@ fi
 
 # Check if virtual environment exists
 if [ ! -d "venv" ]; then
-    echo "📦 Creating virtual environment..."
+    echo "📦 Creating virtual environment and installing dependencies..."
     python3 -m venv venv
+    source venv/bin/activate
+    
+    # Use --no-cache-dir and a custom TMPDIR only during initial setup
+    mkdir -p .pip_tmp
+    export TMPDIR=$PWD/.pip_tmp
+    pip install --no-cache-dir -q --upgrade pip
+    pip install --no-cache-dir -q -r requirements.txt
+    rm -rf .pip_tmp
+else
+    # Just activate it if it already exists
+    source venv/bin/activate
 fi
-
-# Activate virtual environment
-source venv/bin/activate
-
-# Install/update dependencies (full version with RPi support)
-echo "📥 Installing dependencies..."
-pip install -q --upgrade pip
-pip install -q -r requirements.txt
 
 # Run the application in production mode (will push to e-ink display)
 echo "🚀 Running SportyWeatherDisplay (production mode)..."

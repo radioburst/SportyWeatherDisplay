@@ -107,7 +107,7 @@ def draw_moon_phase(phase, size=100):
             draw.ellipse(inner_box, fill="white")
 
     # black outline
-    draw.ellipse(full_box, outline="black", width=1)
+    draw.ellipse(full_box, outline="black", width=2)
  
     # Convert to base64
     buffered = io.BytesIO()

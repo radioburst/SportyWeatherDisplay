@@ -41,8 +41,12 @@ source venv/bin/activate
 
 # Install/update dependencies (dev version without RPi deps)
 echo "📥 Installing dependencies..."
-pip install -q --upgrade pip
-pip install -q -r requirements-dev.txt
+# Use --no-cache-dir and a custom TMPDIR to avoid "No space left on device" on Pi Zero
+mkdir -p .pip_tmp
+export TMPDIR=$PWD/.pip_tmp
+pip install --no-cache-dir -q --upgrade pip
+pip install --no-cache-dir -q -r requirements-dev.txt
+rm -rf .pip_tmp
 
 # Run the application with TEST_MODE enabled
 echo "🚀 Running SportyWeatherDisplay (test mode)..."
