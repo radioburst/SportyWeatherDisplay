@@ -86,6 +86,7 @@ body {
     height: 80px;
     margin-right: 25px;
     justify-self: center;
+    image-rendering: pixelated;
 }
 
 .temp-container {
@@ -130,6 +131,7 @@ body {
     height: 28px;
     vertical-align: middle;
     margin-right: 4px;
+    image-rendering: pixelated;
 }
 
 .hourly-graph {
@@ -237,6 +239,7 @@ body {
     height: 48px;
     margin-bottom: 8px;
     align-self: center;
+    image-rendering: pixelated;
 }
 
 .forecast-day .day-temp {
@@ -253,9 +256,10 @@ body {
 }
 
 .moon-icon {
-    width: 18px;
-    height: 18px;
+    width: 24px;
+    height: 24px;
     vertical-align: middle;
+    image-rendering: pixelated;
 }
 
 /* Right Panel - Strava */
@@ -311,6 +315,7 @@ body {
     width: 18px;
     height: 18px;
     flex-shrink: 0;
+    image-rendering: pixelated;
 }
 
 .run-indicator {
@@ -340,6 +345,7 @@ body {
     flex-shrink: 0;
     vertical-align: middle;
     margin-right: 4px;
+    image-rendering: pixelated;
 }
 
 .run-map {

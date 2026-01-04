@@ -60,22 +60,22 @@ def get_icon_base64(icon_name):
 from PIL import Image, ImageDraw
 
 def draw_moon_phase(phase, size=100):
-    # Create canvas with transparency (RGBA)
-    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    # Draw at 4x resolution to get crisp edges after thresholding
+    render_size = size * 4
+    img = Image.new("RGBA", (render_size, render_size), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     
-    padding = 2
-    center = size / 2
-    radius = (size / 2) - padding
+    padding = 8 # 2 * 4
+    center = render_size / 2
+    radius = (render_size / 2) - padding
     
     # Bounding box for the full moon circle
-    full_box = [padding, padding, size - padding, size - padding]
+    full_box = [padding, padding, render_size - padding, render_size - padding]
 
     # Draw the base (The dark part of the moon)
     draw.ellipse(full_box, fill="black")
 
     # Calculate the width factor of the middle ellipse (-1 to 1)
-    # This determines if the inner curve is convex or concave
     w_factor = abs(phase - 0.5) * 4 - 1
     inner_w = radius * w_factor
 
@@ -83,35 +83,46 @@ def draw_moon_phase(phase, size=100):
     x0 = center - inner_w
     x1 = center + inner_w
     
-    # CRASH FIX: Ensure x0 is always the smaller value
-    inner_box = [min(x0, x1), padding, max(x0, x1), size - padding]
+    inner_box = [min(x0, x1), padding, max(x0, x1), render_size - padding]
 
     if 0 <= phase <= 0.5:
         # Waxing: Right side is primarily lit
         draw.pieslice(full_box, 270, 90, fill="white")
         if phase < 0.25:
-            # Crescent: The inner ellipse 'removes' light (draw black)
             draw.ellipse(inner_box, fill="black")
         else:
-            # Gibbous: The inner ellipse 'adds' light (draw white)
             draw.ellipse(inner_box, fill="white")
-            
     else:
         # Waning: Left side is primarily lit
         draw.pieslice(full_box, 90, 270, fill="white")
         if phase > 0.75:
-            # Crescent: The inner ellipse 'removes' light (draw black)
             draw.ellipse(inner_box, fill="black")
         else:
-            # Gibbous: The inner ellipse 'adds' light (draw white)
             draw.ellipse(inner_box, fill="white")
 
-    # black outline
-    draw.ellipse(full_box, outline="black", width=2)
+    draw.ellipse(full_box, outline="black", width=4)
  
+    # Convert to grayscale and threshold to remove anti-aliasing (half-pixels)
+    # We use a high threshold to keep the white parts white and everything else black
+    alpha = img.split()[3]
+    img_l = img.convert("L")
+    
+    # Create a mask where pixels are either 0 or 255
+    threshold = 128
+    img_bw = img_l.point(lambda p: 255 if p > threshold else 0)
+    
+    # Re-apply the alpha channel (also thresholded)
+    alpha_bw = alpha.point(lambda p: 255 if p > 128 else 0)
+    
+    # Combine back
+    final_img = Image.merge("RGBA", (img_bw, img_bw, img_bw, alpha_bw))
+    
+    # Downscale to target size using NEAREST to keep it crisp
+    final_img = final_img.resize((size, size), Image.NEAREST)
+
     # Convert to base64
     buffered = io.BytesIO()
-    img.save(buffered, format="PNG")
+    final_img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
     return f"data:image/png;base64,{img_str}"
 
@@ -206,7 +217,7 @@ def get_weather_data():
                 'max': int(day['temp']['max']),
                 'icon': get_icon_base64(icon_code),
                 'moon_phase': moon_illumination,
-                'moon_icon': draw_moon_phase(moon_phase)
+                'moon_icon': draw_moon_phase(moon_phase, size=24)
             })
         
         # Get weather icon
