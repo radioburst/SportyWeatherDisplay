@@ -59,70 +59,53 @@ def get_icon_base64(icon_name):
 
 from PIL import Image, ImageDraw
 
-def draw_moon_phase(phase, size=100):
-    # Draw at 4x resolution to get crisp edges after thresholding
-    render_size = size * 4
-    img = Image.new("RGBA", (render_size, render_size), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(img)
+def draw_moon_phase(phase, size=24):
+    import math
+    # Create a crisp RGBA image
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    pixels = img.load()
     
-    padding = 8 # 2 * 4
-    center = render_size / 2
-    radius = (render_size / 2) - padding
+    # Use float centers for better symmetry
+    center = (size - 1) / 2.0
+    radius = (size / 2.0) - 1.0
     
-    # Bounding box for the full moon circle
-    full_box = [padding, padding, render_size - padding, render_size - padding]
-
-    # Draw the base (The dark part of the moon)
-    draw.ellipse(full_box, fill="black")
-
-    # Calculate the width factor of the middle ellipse (-1 to 1)
-    w_factor = abs(phase - 0.5) * 4 - 1
-    inner_w = radius * w_factor
-
-    # Define the left and right x-coordinates for the inner ellipse
-    x0 = center - inner_w
-    x1 = center + inner_w
-    
-    inner_box = [min(x0, x1), padding, max(x0, x1), render_size - padding]
-
-    if 0 <= phase <= 0.5:
-        # Waxing: Right side is primarily lit
-        draw.pieslice(full_box, 270, 90, fill="white")
-        if phase < 0.25:
-            draw.ellipse(inner_box, fill="black")
-        else:
-            draw.ellipse(inner_box, fill="white")
-    else:
-        # Waning: Left side is primarily lit
-        draw.pieslice(full_box, 90, 270, fill="white")
-        if phase > 0.75:
-            draw.ellipse(inner_box, fill="black")
-        else:
-            draw.ellipse(inner_box, fill="white")
-
-    draw.ellipse(full_box, outline="black", width=4)
- 
-    # Convert to grayscale and threshold to remove anti-aliasing (half-pixels)
-    # We use a high threshold to keep the white parts white and everything else black
-    alpha = img.split()[3]
-    img_l = img.convert("L")
-    
-    # Create a mask where pixels are either 0 or 255
-    threshold = 128
-    img_bw = img_l.point(lambda p: 255 if p > threshold else 0)
-    
-    # Re-apply the alpha channel (also thresholded)
-    alpha_bw = alpha.point(lambda p: 255 if p > 128 else 0)
-    
-    # Combine back
-    final_img = Image.merge("RGBA", (img_bw, img_bw, img_bw, alpha_bw))
-    
-    # Downscale to target size using NEAREST to keep it crisp
-    final_img = final_img.resize((size, size), Image.NEAREST)
+    for y in range(size):
+        for x in range(size):
+            dx = x - center
+            dy = y - center
+            dist = math.sqrt(dx*dx + dy*dy)
+            
+            # 1. Draw the 1-pixel black outline
+            if radius <= dist < radius + 1.0:
+                pixels[x, y] = (0, 0, 0, 255)
+                
+            # 2. Draw the moon body
+            elif dist < radius:
+                # Calculate the horizontal width of the moon at this specific Y
+                local_r = math.sqrt(radius*radius - dy*dy)
+                
+                # The terminator is an ellipse that shifts based on the phase
+                # We calculate the x-offset of the terminator line
+                term_x = local_r * math.cos(2 * math.pi * phase)
+                
+                is_lit = False
+                if phase <= 0.5: 
+                    # Waxing: Lit part is on the right
+                    if dx > term_x: is_lit = True
+                else: 
+                    # Waning: Lit part is on the left
+                    # We flip the terminator position for the second half of the cycle
+                    if dx < -term_x: is_lit = True
+                
+                # Flip colors: Lit part is White, Shadow part is Black
+                if is_lit:
+                    pixels[x, y] = (255, 255, 255, 255) # White (Lit)
+                else:
+                    pixels[x, y] = (0, 0, 0, 255) # Black (Shadow)
 
     # Convert to base64
     buffered = io.BytesIO()
-    final_img.save(buffered, format="PNG")
+    img.save(buffered, format="PNG")
     img_str = base64.b64encode(buffered.getvalue()).decode()
     return f"data:image/png;base64,{img_str}"
 
