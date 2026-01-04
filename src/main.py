@@ -121,7 +121,7 @@ def main():
             
             # Load and display the image
             dashboard = Image.open(output_file)
-            inky_display.set_image(dashboard, saturation=0.5)
+            inky_display.set_image(dashboard, saturation=0.1)
             inky_display.show()
             print("Dashboard pushed to Inky Impression 2025!")
         except Exception as e:
