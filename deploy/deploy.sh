@@ -57,6 +57,17 @@ if [ -e "/dev/spidev0.0" ] && [ ! -r "/dev/spidev0.0" ]; then
     exit 1
 fi
 
+# Check if SPI chip select is disabled in config.txt
+echo -e "${YELLOW}🔍 Checking SPI configuration...${NC}"
+if ! grep -q "dtoverlay=spi0-0cs" /boot/firmware/config.txt; then
+    echo -e "${YELLOW}⚠️  SPI chip-select needs to be disabled${NC}"
+    echo "Adding 'dtoverlay=spi0-0cs' to /boot/firmware/config.txt"
+    echo "dtoverlay=spi0-0cs" | sudo tee -a /boot/firmware/config.txt
+    echo -e "${RED}Reboot required! Run: sudo reboot${NC}"
+    echo "After reboot, run this script again"
+    exit 1
+fi
+
 # Build the container image
 echo -e "${YELLOW}📦 Building container image...${NC}"
 podman build -t ${PROJECT_NAME}:latest -f deploy/Containerfile .

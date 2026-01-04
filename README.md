@@ -21,14 +21,21 @@ Displays weather forecasts and your recent Strava activities on an e-ink display
    # Edit settings.json with your API keys
    ```
 
-2. **Run locally:**
+2. **Run locally (test mode, preview image only):**
    ```bash
    ./run.sh
    ```
 
-   This will create a virtual environment, install dependencies, and generate `eink_display_preview.png`.
+   This will create a virtual environment, install dev dependencies (without e-ink drivers), and generate `eink_display_preview.png`.
 
-### Raspberry Pi Deployment
+### Raspberry Pi (Production)
+
+**Run once manually:**
+```bash
+./run-pi.sh  # Installs deps and pushes to e-ink display
+```
+
+**Or set up automatic updates:**
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 

@@ -13,7 +13,7 @@ fi
 # Install system dependencies on Raspberry Pi
 if [ -f /etc/rpi-issue ]; then
     echo "🔧 Checking system dependencies..."
-    REQUIRED_PKGS="libopenjp2-7 libtiff5 libwebp7 chromium-browser chromium-chromedriver"
+    REQUIRED_PKGS="libopenjp2-7 libtiff6 libwebp7 chromium chromium-driver"
     INSTALL_NEEDED=false
     
     for pkg in $REQUIRED_PKGS; do

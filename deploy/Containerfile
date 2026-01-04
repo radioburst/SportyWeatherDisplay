@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     libjpeg62-turbo \
     libfreetype6 \
     liblcms2-2 \
+    libopenblas0 \
     && rm -rf /var/lib/apt/lists/*
 
 # Set up working directory

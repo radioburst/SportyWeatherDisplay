@@ -81,6 +81,17 @@ That's it! The script will:
 3. Start automatic updates every 15 minutes
 4. Enable lingering so it runs even when you're not logged in
 
+### Alternative: Run Without Container
+
+If you prefer to run directly without containerization:
+
+```bash
+chmod +x run-pi.sh
+./run-pi.sh  # Installs deps and runs in production mode
+```
+
+This is useful for testing, but the containerized deployment is recommended for production.
+
 ## Management Commands
 
 ### On the Raspberry Pi:
@@ -165,6 +176,15 @@ The container accesses the e-ink display through SPI devices:
 - `/dev/gpiomem` - GPIO memory access
 
 These devices are mounted into the container via the systemd service.
+
+**Important:** You must disable SPI's chip-select in `/boot/firmware/config.txt`:
+
+```bash
+echo "dtoverlay=spi0-0cs" | sudo tee -a /boot/firmware/config.txt
+sudo reboot
+```
+
+The deployment script will check and add this automatically if needed.
 
 **If the display doesn't update:**
 

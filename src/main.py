@@ -58,7 +58,18 @@ def main():
     output_file = os.path.join(output_dir, OUTPUT_FILE)
     
     # Render HTML to image at larger size to avoid bottom margin issue
-    hti = Html2Image(output_path=output_dir)
+    # Configure for headless operation (no X server needed)
+    hti = Html2Image(
+        output_path=output_dir,
+        custom_flags=[
+            '--headless',
+            '--disable-gpu',
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+            '--disable-software-rasterizer',
+            '--disable-extensions'
+        ]
+    )
     hti.screenshot(
         html_str=html_content,
         save_as="temp_render.png",
@@ -78,15 +89,20 @@ def main():
     print("Open the file to preview the display")
     
     if not TEST_MODE:
-        # Push to actual e-ink display
+        # Push to actual e-ink display (Inky Impression 2025 - PIM773, 6-color)
         try:
-            from inky.auto import auto
+            from inky.inky_e673 import Inky
             from PIL import Image
-            inky_display = auto()
+            
+            # Initialize Inky Impression 2025 (800x480, 6-color Spectra)
+            # This is the E673 controller for the 7.3" 2025 edition
+            inky_display = Inky()
+            
+            # Load and display the image
             dashboard = Image.open(output_file)
             inky_display.set_image(dashboard, saturation=0.5)
             inky_display.show()
-            print("Dashboard pushed to e-ink display!")
+            print("Dashboard pushed to Inky Impression 2025!")
         except Exception as e:
             print(f"E-ink display error: {e}")
 
