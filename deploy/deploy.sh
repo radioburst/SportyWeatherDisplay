@@ -33,6 +33,30 @@ if ! command -v podman &> /dev/null; then
     exit 1
 fi
 
+# Check if SPI is enabled
+echo -e "${YELLOW}🔍 Checking SPI configuration...${NC}"
+if [ ! -e "/dev/spidev0.0" ]; then
+    echo -e "${RED}❌ Warning: SPI device not found (/dev/spidev0.0)${NC}"
+    echo "Enable SPI with: sudo raspi-config"
+    echo "Navigate to: Interface Options → SPI → Enable"
+    echo "Then reboot your Raspberry Pi"
+    echo ""
+    read -p "Continue anyway? (y/N) " -n 1 -r
+    echo
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        exit 1
+    fi
+fi
+
+# Check if user has access to SPI/GPIO
+if [ -e "/dev/spidev0.0" ] && [ ! -r "/dev/spidev0.0" ]; then
+    echo -e "${YELLOW}⚠️  Adding user to spi and gpio groups...${NC}"
+    sudo usermod -a -G spi,gpio $USER
+    echo "You'll need to log out and back in for group changes to take effect"
+    echo "Then run this script again"
+    exit 1
+fi
+
 # Build the container image
 echo -e "${YELLOW}📦 Building container image...${NC}"
 podman build -t ${PROJECT_NAME}:latest -f deploy/Containerfile .

@@ -83,7 +83,7 @@ def main():
             from inky.auto import auto
             from PIL import Image
             inky_display = auto()
-            dashboard = Image.open(OUTPUT_FILE)
+            dashboard = Image.open(output_file)
             inky_display.set_image(dashboard, saturation=0.5)
             inky_display.show()
             print("Dashboard pushed to e-ink display!")

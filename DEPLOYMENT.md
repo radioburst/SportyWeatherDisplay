@@ -26,7 +26,15 @@ sudo apt install -y podman git
 # Ensure SPI is enabled for e-ink display
 sudo raspi-config
 # Navigate to: Interface Options → SPI → Enable
+# Reboot when prompted
+
+# Add your user to spi and gpio groups (for device access)
+sudo usermod -a -G spi,gpio $USER
+
+# Log out and back in for group changes to take effect
 ```
+
+**Note:** The deployment script will check these prerequisites automatically.
 
 ## Deployment
 
@@ -149,6 +157,41 @@ git pull
 The new container will be used on the next scheduled run (or run manually with `systemctl --user start sporty-weather.service`).
 
 ## Troubleshooting
+
+### E-ink Display Access
+
+The container accesses the e-ink display through SPI devices:
+- `/dev/spidev0.0` - SPI interface
+- `/dev/gpiomem` - GPIO memory access
+
+These devices are mounted into the container via the systemd service.
+
+**If the display doesn't update:**
+
+1. **Check SPI is enabled:**
+   ```bash
+   ls -l /dev/spidev0.0
+   # Should show the device exists
+   ```
+
+2. **Verify group membership:**
+   ```bash
+   groups
+   # Should include: spi, gpio
+   ```
+   
+   If not, add yourself:
+   ```bash
+   sudo usermod -a -G spi,gpio $USER
+   # Log out and back in
+   ```
+
+3. **Test the display works:**
+   ```bash
+   # Run the service manually to see errors
+   systemctl --user start sporty-weather.service
+   journalctl --user -u sporty-weather.service -n 50
+   ```
 
 ### Container doesn't start
 ```bash
