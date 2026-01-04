@@ -1,0 +1,14 @@
+[Unit]
+Description=Sporty Weather Display Dashboard Timer
+Requires=sporty-weather.service
+
+[Timer]
+# Run every 15 minutes
+OnCalendar=*:0/15
+# Run on boot after 2 minutes
+OnBootSec=2min
+# Allow missed runs if system was off
+Persistent=true
+
+[Install]
+WantedBy=timers.target

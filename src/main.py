@@ -9,7 +9,7 @@ import os
 DISPLAY_WIDTH = 800
 DISPLAY_HEIGHT = 480
 OUTPUT_FILE = "eink_display_preview.png"
-TEST_MODE = True
+TEST_MODE = os.environ.get('TEST_MODE', 'true').lower() == 'true'
 
 def create_dashboard_html():
     """Create the dashboard using HTML templates"""
@@ -20,13 +20,16 @@ def create_dashboard_html():
     # Get strava data
     runs_data = strava.get_runs_data()
     
+    # Get paths relative to src directory
+    src_dir = os.path.dirname(__file__)
+    
     # Load CSS file
-    css_path = os.path.join(os.path.dirname(__file__), 'templates', 'dashboard.css')
+    css_path = os.path.join(src_dir, 'templates', 'dashboard.css')
     with open(css_path, 'r') as f:
         css_content = f.read()
     
     # Load HTML template
-    template_path = os.path.join(os.path.dirname(__file__), 'templates', 'dashboard.html')
+    template_path = os.path.join(src_dir, 'templates', 'dashboard.html')
     with open(template_path, 'r') as f:
         template = Template(f.read())
     
@@ -45,25 +48,33 @@ def main():
     # Create HTML dashboard
     html_content = create_dashboard_html()
     
+    # Determine output directory: /output for container, current dir for local
+    if os.path.exists('/output') and os.path.isdir('/output'):
+        output_dir = '/output'
+    else:
+        output_dir = os.getcwd()
+    
+    temp_file = os.path.join(output_dir, "temp_render.png")
+    output_file = os.path.join(output_dir, OUTPUT_FILE)
+    
     # Render HTML to image at larger size to avoid bottom margin issue
-    temp_file = "temp_render.png"
-    hti = Html2Image(output_path=os.path.dirname(__file__))
+    hti = Html2Image(output_path=output_dir)
     hti.screenshot(
         html_str=html_content,
-        save_as=temp_file,
+        save_as="temp_render.png",
         size=(DISPLAY_WIDTH, DISPLAY_HEIGHT + 120)  # Render extra height
     )
     
     # Crop to exact size
     img = PILImage.open(temp_file)
     img_cropped = img.crop((0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT))
-    img_cropped.save(OUTPUT_FILE)
+    img_cropped.save(output_file)
     
     # Clean up temp file
     if os.path.exists(temp_file):
         os.remove(temp_file)
     
-    print(f"Dashboard saved to {OUTPUT_FILE}")
+    print(f"Dashboard saved to {output_file}")
     print("Open the file to preview the display")
     
     if not TEST_MODE:

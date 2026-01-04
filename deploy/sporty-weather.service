@@ -1,0 +1,28 @@
+[Unit]
+Description=Sporty Weather Display Dashboard
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/podman run \
+    --rm \
+    --name sporty-weather \
+    -v %h/.config/sporty-weather/settings.json:/app/settings.json:ro \
+    -v %h/.config/sporty-weather/output:/output:rw \
+    --device /dev/spidev0.0 \
+    --device /dev/gpiomem \
+    localhost/sporty-weather-display:latest
+
+# Security hardening
+ProtectSystem=strict
+ProtectHome=read-only
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Restart policy
+Restart=on-failure
+RestartSec=5m
+
+[Install]
+WantedBy=default.target

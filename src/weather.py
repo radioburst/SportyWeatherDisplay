@@ -6,8 +6,8 @@ import io
 import os
 import json
 
-# Path to settings file
-SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'settings.json')
+# Path to settings file (in project root)
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.json')
 
 def load_settings():
     """Load settings from JSON file"""
@@ -42,12 +42,13 @@ def get_moon_phase(date=None):
 
 def get_icon_base64(icon_name):
     """Convert icon to base64 data URI"""
-    icon_path = os.path.join(os.path.dirname(__file__), 'icons', f'{icon_name}.png')
+    project_root = os.path.dirname(os.path.dirname(__file__))
+    icon_path = os.path.join(project_root, 'icons', f'{icon_name}.png')
     
     # If night icon doesn't exist, try day version
     if not os.path.exists(icon_path) and icon_name.endswith('n'):
         icon_name = icon_name[:-1] + 'd'
-        icon_path = os.path.join(os.path.dirname(__file__), 'icons', f'{icon_name}.png')
+        icon_path = os.path.join(project_root, 'icons', f'{icon_name}.png')
     
     if os.path.exists(icon_path):
         with open(icon_path, 'rb') as f:

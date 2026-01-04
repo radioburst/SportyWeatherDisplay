@@ -11,8 +11,8 @@ import json
 import time
 import requests
 
-# Path to settings file
-SETTINGS_FILE = os.path.join(os.path.dirname(__file__), 'settings.json')
+# Path to settings file (in project root)
+SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.json')
 
 def load_settings():
     """Load settings from JSON file"""
