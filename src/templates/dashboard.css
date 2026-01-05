@@ -30,7 +30,7 @@ body {
 
 /* Left Panel - Weather */
 .weather-panel {
-    width: 400px;
+    width: 520px;
     height: 480px;
     padding: 5px 10px 5px 5px;
     flex-direction: column;
@@ -127,8 +127,8 @@ body {
 }
 
 .detail-icon {
-    width: 28px;
-    height: 28px;
+    width: 30px;
+    height: 30px;
     vertical-align: middle;
     margin-right: 4px;
     image-rendering: pixelated;
@@ -136,71 +136,52 @@ body {
 
 .hourly-graph {
     display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    grid-template-rows: auto 24px auto auto;
-    height: 62px;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    height: 80px;
     margin-top: 10px;
-    padding: 0 10px;
-    position: relative;
-    gap: 8px;
-}
-
-.graph-line-overlay {
-    position: absolute;
-    left: 10px;
-    right: 10px;
-    top: 18px;
-    height: 24px;
-    width: calc(100% - 20px);
-    pointer-events: none;
-}
-
-.graph-line-overlay polyline {
-    fill: none;
-    stroke: #076ab1;
-    stroke-width: 2;
-    vector-effect: non-scaling-stroke;
+    padding: 0 5px;
+    gap: 0px;
 }
 
 .hour-column {
-    display: contents;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
 }
 
 .temp-label {
     font-size: 14px;
     text-align: center;
-    grid-row: 1;
 }
 
-.graph-container {
-    grid-row: 2;
-    position: relative;
+.rain-container {
     display: flex;
-    align-items: flex-end;
+    flex-direction: row;
+    align-items: center;
     justify-content: center;
+    width: 100%;
+    gap: 2px;
 }
 
-.graph-point {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #024c81;
-    position: absolute;
-    transform: translateY(50%);
+.raindrop-icon {
+    width: 23px;
+    height: 23px;
+    flex-shrink: 0;
+    image-rendering: pixelated;
 }
 
-.rain-label {
+.rain-perc {
     font-size: 14px;
-    color: #3b82f6;
-    text-align: center;
-    grid-row: 3;
+    color: #2563eb;
+    white-space: nowrap;
 }
 
 .hour-label {
     font-size: 14px;
-    color: #666;
+    color: #000;
     text-align: center;
-    grid-row: 4;
 }
 
 .forecast-section {
@@ -235,8 +216,8 @@ body {
 }
 
 .forecast-day .day-icon {
-    width: 48px;
-    height: 48px;
+    width: 49px;
+    height: 49px;
     margin-bottom: 8px;
     align-self: center;
     image-rendering: pixelated;
@@ -256,15 +237,15 @@ body {
 }
 
 .moon-icon {
-    width: 24px;
-    height: 24px;
+    width: 23px;
+    height: 23px;
     vertical-align: middle;
     image-rendering: pixelated;
 }
 
 /* Right Panel - Strava */
 .strava-panel {
-    width: 400px;
+    width: 275px;
     height: 480px;
     display: flex;
     flex-direction: column;
@@ -279,7 +260,7 @@ body {
     padding: 0px;
     gap: 0;
     margin-bottom: 10px;
-    margin-right: 5px;
+    margin-right: 0px;
 }
 
 .run-entry:first-child {
@@ -291,7 +272,7 @@ body {
 }
 
 .run-stats {
-    width: 110px;
+    width: 120px;
     height: 100%;
     display: flex;
     flex-direction: column;
@@ -308,12 +289,12 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-left: 5px;
+    margin-left: 7px;
 }
 
 .activity-icon {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     flex-shrink: 0;
     image-rendering: pixelated;
 }
@@ -332,7 +313,7 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-left: 5px;
+    margin-left: 7px;
 }
 
 .run-stats .stat:last-child {
@@ -340,8 +321,8 @@ body {
 }
 
 .stat-icon {
-    width: 18px;
-    height: 18px;
+    width: 19px;
+    height: 19px;
     flex-shrink: 0;
     vertical-align: middle;
     margin-right: 4px;

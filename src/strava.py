@@ -1,4 +1,3 @@
-from staticmap import StaticMap, Line, CircleMarker
 from PIL import Image, ImageDraw, ImageFont
 from stravalib.client import Client
 from datetime import datetime, timedelta
@@ -78,9 +77,75 @@ def get_strava_client():
     client = Client(access_token=access_token)
     return client
 
+def draw_route_only(coordinates, width, height, color):
+    """Draw only the route polyline on a transparent background"""
+    import math
+    # Create a transparent image
+    img = Image.new("RGBA", (width, height), (255, 255, 255, 0))
+    draw = ImageDraw.Draw(img)
+    
+    if not coordinates:
+        return img
+        
+    # Extract lats and lons
+    lats = [c[0] for c in coordinates]
+    lons = [c[1] for c in coordinates]
+    
+    min_lat, max_lat = min(lats), max(lats)
+    min_lon, max_lon = min(lons), max(lons)
+    
+    # Add padding
+    padding = 15
+    draw_width = width - 2 * padding
+    draw_height = height - 2 * padding
+    
+    lat_range = max_lat - min_lat
+    lon_range = max_lon - min_lon
+    
+    # Avoid division by zero
+    if lat_range == 0: lat_range = 0.0001
+    if lon_range == 0: lon_range = 0.0001
+    
+    # Scale to fit while maintaining aspect ratio
+    # We need to account for the fact that 1 degree of latitude is not the same distance as 1 degree of longitude
+    # But for small areas (like a run), we can approximate
+    avg_lat = (min_lat + max_lat) / 2
+    lon_scale_factor = math.cos(math.radians(avg_lat))
+    
+    scaled_lon_range = lon_range * lon_scale_factor
+    
+    scale = min(draw_width / scaled_lon_range, draw_height / lat_range)
+    
+    # Center the route
+    offset_x = padding + (draw_width - scaled_lon_range * scale) / 2
+    offset_y = padding + (draw_height - lat_range * scale) / 2
+    
+    # Convert coordinates to pixel positions
+    points = []
+    for lat, lon in coordinates:
+        px = offset_x + (lon - min_lon) * lon_scale_factor * scale
+        py = offset_y + (max_lat - lat) * scale
+        points.append((px, py))
+    
+    # Draw the line with a thick, solid stroke
+    draw.line(points, fill=color, width=4, joint="round")
+    
+    # Draw start/end markers
+    r = 5
+    # Start (Green)
+    s_x, s_y = points[0]
+    draw.ellipse([s_x-r, s_y-r, s_x+r, s_y+r], fill="#00d46a", outline="black", width=1)
+    
+    # End (Activity Color)
+    e_x, e_y = points[-1]
+    draw.ellipse([e_x-r, e_y-r, e_x+r, e_y+r], fill=color, outline="black", width=1)
+    
+    return img
+
 def get_runs_data():
     """Get runs data as list of dictionaries for HTML template"""
-    colors = ['#fc5200', '#2563eb', '#10b981']  # Strava orange, Blue, Green
+    # Colors for each run: Strava orange, Blue, Green
+    colors = ['#fc5200', '#2563eb', '#10b981'] 
     
     try:
         client = get_strava_client()
@@ -128,23 +193,11 @@ def get_runs_data():
                 try:
                     coordinates = polyline.decode(run.map.summary_polyline)
                     if coordinates:
-                        # Create small map
-                        m = StaticMap(290, 148, padding_x=5, padding_y=5,
-                                    url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png')
-                        
-                        line_coords = [(lon, lat) for lat, lon in coordinates]
-                        line = Line(line_coords, color=colors[i], width=3)
-                        m.add_line(line)
-                        
-                        # Add markers
-                        start_lon, start_lat = coordinates[0][1], coordinates[0][0]
-                        m.add_marker(CircleMarker((start_lon, start_lat), '#00d46a', 6))
-                        
-                        end_lon, end_lat = coordinates[-1][1], coordinates[-1][0]
-                        m.add_marker(CircleMarker((end_lon, end_lat), colors[i], 6))
+                        # Draw only the route outline on a white background
+                        # Width is ~150px in the dashboard layout
+                        map_img = draw_route_only(coordinates, 150, 148, colors[i])
                         
                         # Convert to base64
-                        map_img = m.render()
                         buffered = io.BytesIO()
                         map_img.save(buffered, format="PNG")
                         img_str = base64.b64encode(buffered.getvalue()).decode()
@@ -242,30 +295,11 @@ def get_runs_with_maps(width, height):
                     coordinates = polyline.decode(run.map.summary_polyline)
                     
                     if coordinates:
-                        # Create small map
-                        m = StaticMap(
-                            map_width,
-                            map_height,
-                            padding_x=5,
-                            padding_y=5,
-                            url_template='https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-                        )
+                        # Draw only the route outline on a transparent background
+                        map_img = draw_route_only(coordinates, map_width, map_height, colors[i])
                         
-                        # Draw the route
-                        line_coords = [(lon, lat) for lat, lon in coordinates]
-                        line = Line(line_coords, color=colors[i], width=3)
-                        m.add_line(line)
-                        
-                        # Add markers
-                        start_lon, start_lat = coordinates[0][1], coordinates[0][0]
-                        m.add_marker(CircleMarker((start_lon, start_lat), '#00d46a', 6))
-                        
-                        end_lon, end_lat = coordinates[-1][1], coordinates[-1][0]
-                        m.add_marker(CircleMarker((end_lon, end_lat), colors[i], 6))
-                        
-                        # Render and paste
-                        map_img = m.render()
-                        img.paste(map_img, (105, y_start + 5))
+                        # Paste onto the main image
+                        img.paste(map_img, (105, y_start + 5), map_img)
                     else:
                         draw.text((110, y_start + 20), "No GPS data", fill="gray")
                 else:

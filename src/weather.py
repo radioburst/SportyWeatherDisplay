@@ -109,6 +109,71 @@ def draw_moon_phase(phase, size=24):
     img_str = base64.b64encode(buffered.getvalue()).decode()
     return f"data:image/png;base64,{img_str}"
 
+def draw_raindrop(percent, size=24):
+    """Draw a pixel-perfect raindrop filled by percentage"""
+    import math
+    # Create a crisp RGBA image
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    pixels = img.load()
+    
+    # Raindrop color (Blue: #2563eb)
+    color = (37, 99, 235, 255)
+    
+    # Define shape parameters
+    cx = (size - 1) / 2.0
+    # The circle part is at the bottom
+    cy = size * 0.65 
+    r = size * 0.3
+    # The tip of the drop
+    tip_y = size * 0.1
+    
+    # Calculate fill level (y-coordinate)
+    # 0% = bottom of circle, 100% = tip
+    bottom_y = cy + r
+    fill_y = bottom_y - (percent / 100.0) * (bottom_y - tip_y)
+    
+    for y in range(size):
+        for x in range(size):
+            dx = x - cx
+            dy = y - cy
+            
+            in_shape = False
+            # 1. Check if in the bottom circle
+            if dy >= 0:
+                if math.sqrt(dx*dx + dy*dy) <= r:
+                    in_shape = True
+            # 2. Check if in the top triangle/cone
+            elif y >= tip_y:
+                # Linear interpolation of width from tip to circle equator
+                # At y = tip_y, width = 0
+                # At y = cy, width = r
+                width_at_y = r * (y - tip_y) / (cy - tip_y)
+                if abs(dx) <= width_at_y:
+                    in_shape = True
+            
+            if in_shape:
+                # Draw outline
+                is_outline = False
+                if dy >= 0:
+                    dist = math.sqrt(dx*dx + dy*dy)
+                    if r - 1.0 <= dist <= r:
+                        is_outline = True
+                elif y >= tip_y:
+                    width_at_y = r * (y - tip_y) / (cy - tip_y)
+                    if abs(abs(dx) - width_at_y) < 0.8:
+                        is_outline = True
+                
+                if is_outline:
+                    pixels[x, y] = color
+                elif y >= fill_y:
+                    pixels[x, y] = color
+
+    # Convert to base64
+    buffered = io.BytesIO()
+    img.save(buffered, format="PNG")
+    img_str = base64.b64encode(buffered.getvalue()).decode()
+    return f"data:image/png;base64,{img_str}"
+
 def get_hourly_data(onecall):
     """Extract next 8 hours of temperature and rain data"""
     hourly_data = []
@@ -138,6 +203,7 @@ def get_hourly_data(onecall):
             'hour': hour_time,
             'temp': temp,
             'rain': rain_prob,
+            'raindrop_icon': draw_raindrop(rain_prob, size=24),
             'temp_position': 100 - temp_position  # Invert so high temps are at top
         })
     
@@ -184,7 +250,7 @@ def get_weather_data():
         
         # Get days 1-3 (skip today, show tomorrow and next 2 days)
         forecast_list = []
-        for day in onecall['daily'][1:4]:
+        for day in onecall['daily'][1:5]:
             dt = datetime.fromtimestamp(day['dt'])
             icon_code = day['weather'][0]['icon']
             

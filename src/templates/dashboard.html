@@ -42,21 +42,14 @@
             </div>
 
             <div class="hourly-graph">
-                <svg class="graph-line-overlay">
-                    <polyline points="
-                        {% for hour in weather.hourly -%}
-                        {{ (loop.index0 + 0.5) / 8 * 100 }}%,{{ 100 - hour.temp_position }}%{% if not loop.last %} {% endif %}
-                        {%- endfor %}
-                    " />
-                </svg>
                 {% for hour in weather.hourly %}
                 <div class="hour-column">
-                    <div class="temp-label">{{ hour.temp }}°</div>
-                    <div class="graph-container">
-                        <div class="graph-point" style="bottom: {{ hour.temp_position }}%;"></div>
-                    </div>
-                    <div class="rain-label">{{ hour.rain }}%</div>
                     <div class="hour-label">{{ hour.hour }}:00</div>
+                    <div class="rain-container">
+                        <img src="{{ hour.raindrop_icon }}" class="raindrop-icon">
+                        <span class="rain-perc">{{ hour.rain }}%</span>
+                    </div>
+                    <div class="temp-label">{{ hour.temp }}°</div>
                 </div>
                 {% endfor %}
             </div>
