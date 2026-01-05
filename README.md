@@ -1,17 +1,26 @@
-# SportyWeatherDisplay
-A E-ink Weather and Strava Dashboard
+# SportyWeatherDisplay 🏃‍♂️🚴‍♀️ 🌤️
+A stylish E-ink Weather and Strava Dashboard ✨
 
-Displays weather forecasts and your recent Strava activities on an e-ink display, perfect for a Raspberry Pi with Waveshare/Inky display.
+Displays weather forecasts and your recent Strava activities (including GPX routes) on an **Inky Impression 7.3" (2025 edition)** E-Ink Display. Powered by a Raspberry Pi Zero 2 W and housed in an IKEA RÖDALM picture frame, it creates a stylish, high-contrast dashboard for your home. ✒️ 🖼️
 
-<img src="images/example1.jpg" width="400" alt="example img">
 
-## Features
+<img src="images/example2.jpg" width="850" alt="example img">
 
-- 📊 **Weather Dashboard**: Current conditions, 4-day forecast, moon phase
-- 🏃 **Strava Integration**: Recent runs with maps and statistics
-- 🖼️ **E-ink Optimized**: High-contrast rendering with pixel-perfect icons
-- 🐍 **Native Deployment**: Lightweight Python venv deployment 
-- ⏰ **Automated**: Runs on schedule via systemd timer
+## Features ⚡️
+
+- 🌤️ **Weather Dashboard**: Current conditions, 4-day forecast, moon phase 🌙
+- 🏃 **Strava Integration**: Recent runs (will support rides soon) with maps and statistics 🏃‍♂️
+- 🖼️ **E-ink Optimized**: High-contrast rendering with pixel-perfect icons 🎯
+- 🐍 **Native Deployment**: Lightweight Python venv deployment 🚀
+- ⏰ **Automated**: Runs on schedule via systemd timer ⏱️
+
+## Technical Stack 🛠️
+
+- **Chromium & html2image**: The dashboard is built using standard HTML/CSS and rendered to a high-quality PNG using a headless Chromium browser. This allows for complex layouts and beautiful typography that are difficult to achieve with traditional drawing libraries.
+- **Pillow (PIL)**: Used for post-processing images, including drawing pixel-perfect raindrops and moon phases without anti-aliasing to ensure maximum clarity on e-ink screens.
+- **Jinja2**: A powerful templating engine used to inject weather and Strava data into the HTML dashboard.
+- **Stravalib & OpenWeather API**: Robust libraries and APIs to fetch your latest activities and local weather forecasts.
+- **Inky Library**: Specifically tuned for the Inky Impression 7.3" to handle the 7-color dithering and display updates.
 
 ## Quick Start
 
@@ -37,11 +46,9 @@ Displays weather forecasts and your recent Strava activities on an e-ink display
 ./run-pi.sh  # Installs deps and pushes to e-ink display
 ```
 
-**Deployment:**
+## Deployment:
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
-
-**Quick Start:**
 
 1. **On your Raspberry Pi:**
    ```bash
@@ -60,6 +67,20 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 
 2. **Done!** Your dashboard will update automatically every 15 minutes.
 
+## Configuration
+
+Edit `settings.json`:
+- **OpenWeather API**: Get key from [openweathermap.org](https://openweathermap.org/api)
+- **Strava API**: Create app at [strava.com/settings/api](https://www.strava.com/settings/api)
+- **Location**: Latitude/longitude for weather
+
+## 3D Printed Mounts 🖨️
+
+If you are using the IKEA RÖDALM frame, you can use these 3D printed mounts to perfectly fit the Inky Impression 7.3" display:
+
+- [Inky Impression 2025 (PIM773) IKEA RÖDALM Mount (v1)](https://makerworld.com/en/models/1630044-inky-impression-2025-pim773-ikea-rodlam-mount?from=search)
+- [Inky Impression 2025 (PIM773) IKEA RÖDALM Mount (v2)](https://makerworld.com/en/models/1457388-inky-impression-2025-pim773-ikea-rodlam-mount?from=search#profileId-1519126)
+
 ## Project Structure
 
 ```
@@ -73,13 +94,6 @@ SportyWeatherDisplay/
 ├── settings.json          # Your configuration
 └── run.sh                 # Local run script
 ```
-
-## Configuration
-
-Edit `settings.json`:
-- **OpenWeather API**: Get key from [openweathermap.org](https://openweathermap.org/api)
-- **Strava API**: Create app at [strava.com/settings/api](https://www.strava.com/settings/api)
-- **Location**: Latitude/longitude for weather
 
 ## License
 

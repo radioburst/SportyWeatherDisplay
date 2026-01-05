@@ -117,6 +117,16 @@ journalctl --user -u sporty-weather.service --since today
 
 ## Customization
 
+### Configuration
+
+After deployment, the active configuration file is moved to your user's config directory. If you want to change your API keys or settings, edit this file:
+
+```bash
+nano ~/.config/sporty-weather/settings.json
+```
+
+The service will pick up the changes on the next scheduled run.
+
 ### Change Update Frequency
 
 Edit `sporty-weather.timer` and modify the `OnCalendar` line:
