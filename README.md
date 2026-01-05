@@ -3,6 +3,8 @@ A E-ink Weather and Strava Dashboard
 
 Displays weather forecasts and your recent Strava activities on an e-ink display, perfect for a Raspberry Pi with Waveshare/Inky display.
 
+<img src="images/example1.jpg" width="400" alt="example img">
+
 ## Features
 
 - 📊 **Weather Dashboard**: Current conditions, 4-day forecast, moon phase

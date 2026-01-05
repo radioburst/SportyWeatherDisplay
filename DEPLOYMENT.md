@@ -92,7 +92,8 @@ journalctl --user -u sporty-weather.service -f
 
 # Run manually once
 systemctl --user start sporty-weather.service
-```
+
+# Check timer status
 systemctl --user status sporty-weather.timer
 
 # Check last run
@@ -112,6 +113,7 @@ systemctl --user restart sporty-weather.timer
 
 # List all runs
 journalctl --user -u sporty-weather.service --since today
+```
 
 ## Customization
 
