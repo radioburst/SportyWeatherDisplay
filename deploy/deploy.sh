@@ -26,51 +26,38 @@ if [ ! -f "settings.json" ]; then
     exit 1
 fi
 
-# Check if podman is installed
-if ! command -v podman &> /dev/null; then
-    echo -e "${RED}❌ Error: podman not found${NC}"
-    echo "Install podman with: sudo apt install -y podman"
-    exit 1
+echo -e "${YELLOW}📦 Installing python3-venv and system dependencies...${NC}"
+sudo apt update
+# Use 'chromium' instead of 'chromium-browser' for Debian/Trixie
+# Use 'libopenblas-dev' as an alternative to 'libatlas-base-dev'
+# We install python3-numpy and python3-pil via apt to avoid long compilation on Pi Zero
+sudo apt install -y python3-venv python3-pip python3-dev build-essential \
+    chromium libopenjp2-7 libtiff-dev libopenblas-dev fontconfig \
+    python3-numpy python3-pil python3-requests python3-jinja2 \
+    python3-rpi.gpio python3-spidev xvfb libnss3
+
+# Enable persistent logging if not already enabled
+if [ ! -d "/var/log/journal" ]; then
+    echo -e "${YELLOW}📝 Enabling persistent systemd journal...${NC}"
+    sudo mkdir -p /var/log/journal
+    sudo systemd-tmpfiles --create --prefix /var/log/journal
+    sudo systemctl restart systemd-journald
 fi
 
-# Check if SPI is enabled
-echo -e "${YELLOW}🔍 Checking SPI configuration...${NC}"
-if [ ! -e "/dev/spidev0.0" ]; then
-    echo -e "${RED}❌ Warning: SPI device not found (/dev/spidev0.0)${NC}"
-    echo "Enable SPI with: sudo raspi-config"
-    echo "Navigate to: Interface Options → SPI → Enable"
-    echo "Then reboot your Raspberry Pi"
-    echo ""
-    read -p "Continue anyway? (y/N) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        exit 1
-    fi
+# Enable lingering to allow user services to run without login
+loginctl enable-linger $USER
+
+# Create virtual environment with system site packages
+# This allows using the pre-compiled numpy and pillow from apt
+echo -e "${YELLOW}🐍 Creating virtual environment...${NC}"
+if [ ! -d "venv" ]; then
+    python3 -m venv --system-site-packages venv
 fi
 
-# Check if user has access to SPI/GPIO
-if [ -e "/dev/spidev0.0" ] && [ ! -r "/dev/spidev0.0" ]; then
-    echo -e "${YELLOW}⚠️  Adding user to spi and gpio groups...${NC}"
-    sudo usermod -a -G spi,gpio $USER
-    echo "You'll need to log out and back in for group changes to take effect"
-    echo "Then run this script again"
-    exit 1
-fi
-
-# Check if SPI chip select is disabled in config.txt
-echo -e "${YELLOW}🔍 Checking SPI configuration...${NC}"
-if ! grep -q "dtoverlay=spi0-0cs" /boot/firmware/config.txt; then
-    echo -e "${YELLOW}⚠️  SPI chip-select needs to be disabled${NC}"
-    echo "Adding 'dtoverlay=spi0-0cs' to /boot/firmware/config.txt"
-    echo "dtoverlay=spi0-0cs" | sudo tee -a /boot/firmware/config.txt
-    echo -e "${RED}Reboot required! Run: sudo reboot${NC}"
-    echo "After reboot, run this script again"
-    exit 1
-fi
-
-# Build the container image
-echo -e "${YELLOW}📦 Building container image...${NC}"
-podman build -t ${PROJECT_NAME}:latest -f deploy/Containerfile .
+# Install python dependencies
+echo -e "${YELLOW}📥 Installing python dependencies...${NC}"
+./venv/bin/pip install --upgrade pip
+./venv/bin/pip install -r requirements.txt
 
 # Create config directory
 echo -e "${YELLOW}📁 Setting up configuration...${NC}"
@@ -78,6 +65,11 @@ mkdir -p ~/.config/sporty-weather/output
 
 # Copy settings.json
 cp settings.json ~/.config/sporty-weather/
+
+# Update systemd service with absolute paths
+echo -e "${YELLOW}🔧 Configuring systemd service...${NC}"
+sed -i "s|ExecStart=.*|ExecStart=$PROJECT_ROOT/venv/bin/python $PROJECT_ROOT/src/main.py|g" deploy/sporty-weather.service
+sed -i "s|WorkingDirectory=.*|WorkingDirectory=$PROJECT_ROOT|g" deploy/sporty-weather.service
 
 # Install systemd service files
 echo -e "${YELLOW}🔧 Installing systemd services...${NC}"
@@ -93,18 +85,17 @@ echo -e "${YELLOW}⏰ Enabling systemd timer...${NC}"
 systemctl --user enable sporty-weather.timer
 systemctl --user start sporty-weather.timer
 
-# Enable lingering to allow user services to run without login
-loginctl enable-linger $USER
+# Trigger a manual run immediately so we can see logs
+echo -e "${YELLOW}🏃 Triggering initial run...${NC}"
+systemctl --user start sporty-weather.service
 
 echo -e "${GREEN}✨ Deployment successful!${NC}"
-echo ""
 echo "The dashboard will update every 15 minutes automatically."
 echo ""
 echo "Useful commands:"
-echo "  - Check timer status:     systemctl --user status sporty-weather.timer"
-echo "  - Check service status:   systemctl --user status sporty-weather.service"
-echo "  - View logs:              journalctl --user -u sporty-weather.service -f"
-echo "  - Run manually now:       systemctl --user start sporty-weather.service"
+echo "  - View logs (NOW):         journalctl --user -u sporty-weather.service -f"
+echo "  - Check timer status:      systemctl --user list-timers | grep sporty"
+echo "  - Run manually again:      systemctl --user start sporty-weather.service"
 echo "  - Stop automatic updates: systemctl --user stop sporty-weather.timer"
 echo ""
 echo "Output images will be in: ~/.config/sporty-weather/output/"

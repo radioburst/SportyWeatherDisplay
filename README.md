@@ -5,10 +5,10 @@ Displays weather forecasts and your recent Strava activities on an e-ink display
 
 ## Features
 
-- 📊 **Weather Dashboard**: Current conditions, 5-day forecast, moon phase
+- 📊 **Weather Dashboard**: Current conditions, 4-day forecast, moon phase
 - 🏃 **Strava Integration**: Recent runs with maps and statistics
-- 🖼️ **E-ink Optimized**: Black and white rendering perfect for e-paper displays
-- 🐳 **Containerized**: Easy deployment with Podman
+- 🖼️ **E-ink Optimized**: High-contrast rendering with pixel-perfect icons
+- 🐍 **Native Deployment**: Lightweight Python venv deployment 
 - ⏰ **Automated**: Runs on schedule via systemd timer
 
 ## Quick Start
@@ -35,7 +35,7 @@ Displays weather forecasts and your recent Strava activities on an e-ink display
 ./run-pi.sh  # Installs deps and pushes to e-ink display
 ```
 
-**Or set up automatic updates:**
+**Deployment:**
 
 See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 
@@ -44,7 +44,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 1. **On your Raspberry Pi:**
    ```bash
    # Clone the repository
-   git clone https://github.com/YOUR_USERNAME/SportyWeatherDisplay.git
+   git clone https://github.com/radioburst/SportyWeatherDisplay.git
    cd SportyWeatherDisplay
    
    # Configure your settings

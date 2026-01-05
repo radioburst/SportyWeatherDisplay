@@ -23,7 +23,7 @@ body {
     overflow: hidden;
     /* Crisp edges for all images and elements */
     image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
+    image-rendering: pixelated;
     -webkit-font-smoothing: none;
     -moz-osx-font-smoothing: none;
 }
@@ -78,7 +78,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-bottom: 13px;
 }
 
 .weather-icon {
@@ -137,8 +137,8 @@ body {
 .hourly-graph {
     display: grid;
     grid-template-columns: repeat(8, minmax(0, 1fr));
-    height: 80px;
-    margin-top: 10px;
+    height: 70px;
+    margin-top: 15px;
     padding: 0 5px;
     gap: 0px;
 }
@@ -162,7 +162,7 @@ body {
     align-items: center;
     justify-content: center;
     width: 100%;
-    gap: 2px;
+    gap: 0px;
 }
 
 .raindrop-icon {
@@ -170,12 +170,14 @@ body {
     height: 23px;
     flex-shrink: 0;
     image-rendering: pixelated;
+    justify-self: right;
 }
 
 .rain-perc {
     font-size: 14px;
     color: #2563eb;
     white-space: nowrap;
+    justify-self: left;
 }
 
 .hour-label {

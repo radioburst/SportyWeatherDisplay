@@ -5,20 +5,12 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/podman run \
-    --rm \
-    --name sporty-weather \
-    -v %h/.config/sporty-weather/settings.json:/app/settings.json:ro \
-    -v %h/.config/sporty-weather/output:/output:rw \
-    --device /dev/spidev0.0 \
-    --device /dev/gpiomem \
-    localhost/sporty-weather-display:latest
-
-# Security hardening
-ProtectSystem=strict
-ProtectHome=read-only
-NoNewPrivileges=true
-PrivateTmp=true
+# The deploy.sh script will replace these with absolute paths
+ExecStart=./venv/bin/python src/main.py
+WorkingDirectory=/home/pi/SportyWeatherDisplay
+Environment=PYTHONUNBUFFERED=1
+StandardOutput=journal
+StandardError=journal
 
 # Restart policy
 Restart=on-failure

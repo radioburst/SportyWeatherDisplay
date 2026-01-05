@@ -6,8 +6,15 @@ import io
 import os
 import json
 
-# Path to settings file (in project root)
-SETTINGS_FILE = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.json')
+# Path to settings file
+def get_settings_path():
+    config_path = os.path.expanduser('~/.config/sporty-weather/settings.json')
+    if os.path.exists(config_path):
+        return config_path
+    # Fallback to project root
+    return os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.json')
+
+SETTINGS_FILE = get_settings_path()
 
 def load_settings():
     """Load settings from JSON file"""

@@ -49,9 +49,12 @@ def main():
     # Create HTML dashboard
     html_content = create_dashboard_html()
     
-    # Determine output directory: /output for container, current dir for local
+    # Determine output directory
+    config_output = os.path.expanduser('~/.config/sporty-weather/output')
     if os.path.exists('/output') and os.path.isdir('/output'):
         output_dir = '/output'
+    elif os.path.exists(config_output) and os.path.isdir(config_output):
+        output_dir = config_output
     else:
         output_dir = os.getcwd()
     
