@@ -95,6 +95,12 @@ SportyWeatherDisplay/
 └── run.sh                 # Local run script
 ```
 
+## Credits
+
+**Icons**: 
+- Activity icons (run, ride, walk, hike) from [Freepik](https://www.freepik.com/)
+- Weather icons from [InkyPi](https://github.com/aceisace/Inky-Calendar)
+
 ## License
 
 See [LICENSE](LICENSE)
