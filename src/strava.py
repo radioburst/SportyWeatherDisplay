@@ -158,7 +158,7 @@ def get_activities_data():
         client = get_strava_client()
         
         # Fetch last activities and filter for Run and Ride
-        activities = client.get_activities(limit=30)
+        activities = client.get_activities(limit=15)
         filtered_activities = []
 
         for act in activities:
