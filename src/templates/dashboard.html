@@ -73,19 +73,23 @@
 
     <!-- Strava Panel -->
     <div class="strava-panel">
-        {% for run in runs %}
+        {% for activity in activities %}
         <div class="run-entry">
             <div class="run-stats">
-                <div class="date"><img src="{{ run.activity_icon }}" class="activity-icon"> {{ run.date }}</div>
-                <div class="run-indicator" style="background-color: {{ run.color }};"></div>
-                <div class="stat"><img src="{{ run.distance_icon }}" class="stat-icon"> {{ run.distance }}</div>
-                <div class="stat"><img src="{{ run.duration_icon }}" class="stat-icon"> {{ run.duration }}</div>
-                <div class="stat"><img src="{{ run.pace_icon }}" class="stat-icon"> {{ run.pace }}</div>
-                <div class="stat"><img src="{{ run.elevation_icon }}" class="stat-icon"> {{ run.elevation }}</div>
+                <div class="date"><img src="{{ activity.activity_icon }}" class="activity-icon"> {{ activity.date }}
+                </div>
+                <div class="run-indicator" style="background-color: {{ activity.color }};"></div>
+                <div class="stat"><img src="{{ activity.distance_icon }}" class="stat-icon"> {{ activity.distance }}
+                </div>
+                <div class="stat"><img src="{{ activity.duration_icon }}" class="stat-icon"> {{ activity.duration }}
+                </div>
+                <div class="stat"><img src="{{ activity.pace_icon }}" class="stat-icon"> {{ activity.pace }}</div>
+                <div class="stat"><img src="{{ activity.elevation_icon }}" class="stat-icon"> {{ activity.elevation }}
+                </div>
             </div>
             <div class="run-map">
-                {% if run.map_path %}
-                <img src="{{ run.map_path }}" alt="Run map">
+                {% if activity.map_path %}
+                <img src="{{ activity.map_path }}" alt="Activity map">
                 {% else %}
                 <div class="no-data">No GPS data</div>
                 {% endif %}

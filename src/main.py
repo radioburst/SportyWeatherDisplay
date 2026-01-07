@@ -19,7 +19,7 @@ def create_dashboard_html():
     weather_data = weather.get_weather_data()
     
     # Get strava data
-    runs_data = strava.get_runs_data()
+    activities_data = strava.get_activities_data()
     
     # Get paths relative to src directory
     src_dir = os.path.dirname(__file__)
@@ -37,7 +37,7 @@ def create_dashboard_html():
     # Render HTML with data
     html_content = template.render(
         weather=weather_data,
-        runs=runs_data,
+        activities=activities_data,
         css_content=css_content
     )
     

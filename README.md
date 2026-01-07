@@ -9,7 +9,7 @@ Displays weather forecasts and your recent Strava activities (including GPX rout
 ## Features ⚡️
 
 - 🌤️ **Weather Dashboard**: Current conditions, 4-day forecast, moon phase 🌙
-- 🏃 **Strava Integration**: Recent runs (will support rides soon) with maps and statistics 🏃‍♂️
+- 🏃 **Strava Integration**: Recent runs, rides and walks with maps and statistics 🏃‍♂️
 - 🖼️ **E-ink Optimized**: High-contrast rendering with pixel-perfect icons 🎯
 - 🐍 **Native Deployment**: Lightweight Python venv deployment 🚀
 - ⏰ **Automated**: Runs on schedule via systemd timer ⏱️

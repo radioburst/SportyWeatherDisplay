@@ -149,56 +149,73 @@ def draw_route_only(coordinates, width, height, color):
     
     return img
 
-def get_runs_data():
-    """Get runs data as list of dictionaries for HTML template"""
-    # Colors for each run: Strava orange, Blue, Green
+def get_activities_data():
+    """Get activities (runs and rides) data as list of dictionaries for HTML template"""
+    # Colors for each activity: Strava orange, Blue, Green
     colors = ['#fc5200', '#2563eb', '#10b981'] 
     
     try:
         client = get_strava_client()
         
-        # Fetch last 3 run activities
-        activities = client.get_activities(limit=10)
-        runs = [act for act in activities if act.type == 'Run'][:3]
+        # Fetch last activities and filter for Run and Ride
+        activities = client.get_activities(limit=30)
+        filtered_activities = []
+
+        for act in activities:
+            # Check for Run, Ride, Walk, or Hike
+            act_type_str = str(act.type)
+            if 'Run' in act_type_str or 'Ride' in act_type_str or 'Walk' in act_type_str or 'Hike' in act_type_str:
+                filtered_activities.append(act)
+            if len(filtered_activities) >= 3:
+                break
+
+        activities_data = []
         
-        runs_data = []
-        
-        for i, run in enumerate(runs):
+        for i, activity in enumerate(filtered_activities):
+            act_type_str = str(activity.type)
+            is_ride = 'Ride' in act_type_str
+            
             # Date
-            date_str = run.start_date_local.strftime("%b %d")
+            date_str = activity.start_date_local.strftime("%b %d")
             
             # Distance
-            distance_km = float(run.distance) / 1000
+            distance_km = float(activity.distance) / 1000
             distance_str = f"{distance_km:.2f}km"
             
             # Duration
-            total_seconds = int(run.moving_time)
+            total_seconds = int(activity.moving_time)
             minutes = total_seconds // 60
             seconds = total_seconds % 60
             duration_str = f"{minutes}:{seconds:02d}"
             
-            # Pace
+            # Pace/Speed
             if distance_km > 0:
-                pace_seconds = total_seconds / distance_km
-                pace_min = int(pace_seconds // 60)
-                pace_sec = int(pace_seconds % 60)
-                pace_str = f"{pace_min}:{pace_sec:02d}/km"
+                if is_ride:
+                    # Speed in km/h for rides
+                    speed_kmh = distance_km / (total_seconds / 3600)
+                    pace_str = f"{speed_kmh:.1f}km/h"
+                else:
+                    # Pace in min/km for runs
+                    pace_seconds = total_seconds / distance_km
+                    pace_min = int(pace_seconds // 60)
+                    pace_sec = int(pace_seconds % 60)
+                    pace_str = f"{pace_min}:{pace_sec:02d}/km"
             else:
                 pace_str = "N/A"
             
             # Elevation gain
-            elevation = int(run.total_elevation_gain) if run.total_elevation_gain else 0
+            elevation = int(activity.total_elevation_gain) if activity.total_elevation_gain else 0
             elevation_str = f"{elevation}m"
             
             # Kudos count
-            kudos = run.kudos_count if run.kudos_count else 0
+            kudos = activity.kudos_count if activity.kudos_count else 0
             kudos_str = f"{kudos}"
             
             # Generate map as base64 data URI
             map_path = None
-            if run.map.summary_polyline:
+            if activity.map.summary_polyline:
                 try:
-                    coordinates = polyline.decode(run.map.summary_polyline)
+                    coordinates = polyline.decode(activity.map.summary_polyline)
                     if coordinates:
                         # Draw only the route outline on a white background
                         # Width is ~150px in the dashboard layout
@@ -210,11 +227,21 @@ def get_runs_data():
                         img_str = base64.b64encode(buffered.getvalue()).decode()
                         map_path = f"data:image/png;base64,{img_str}"
                 except Exception as e:
-                    print(f"Map error for run {i}: {e}")
+                    print(f"Map error for activity {i}: {e}")
             
-            runs_data.append({
+            # Map type to icon name
+            if is_ride:
+                icon_name = 'ride'
+            elif 'Walk' in act_type_str:
+                icon_name = 'walk'
+            elif 'Hike' in act_type_str:
+                icon_name = 'hike'
+            else:
+                icon_name = 'run'
+            
+            activities_data.append({
                 'date': date_str,
-                'activity_icon': get_stat_icon('run'),
+                'activity_icon': get_stat_icon(icon_name),
                 'distance': distance_str,
                 'distance_icon': get_stat_icon('distance'),
                 'duration': duration_str,
@@ -229,38 +256,47 @@ def get_runs_data():
                 'map_path': map_path
             })
         
-        return runs_data
+        return activities_data
         
     except Exception as e:
         print(f"Strava error: {e}")
         return []
 
-def get_runs_with_maps(width, height):
-    """Display last 3 runs with stats and individual maps for each"""
+def get_activities_with_maps(width, height):
+    """Display last 3 activities (runs and rides) with stats and individual maps for each"""
     img = Image.new("RGB", (width, height), "white")
     draw = ImageDraw.Draw(img)
     
-    # Colors for each run
+    # Colors for each activity
     colors = ['#fc5200', '#2563eb', '#10b981']  # Strava orange, Blue, Green
     
     try:
         client = get_strava_client()
         
-        # Fetch last 3 run activities
-        activities = client.get_activities(limit=10)
-        runs = [act for act in activities if act.type == 'Run'][:3]
+        # Fetch last activities and filter for Run and Ride
+        activities = client.get_activities(limit=20)
+        filtered_activities = []
+        for act in activities:
+            act_type_str = str(act.type).upper()
+            # Check for Run, Ride, Walk, or Hike (case-insensitive contains check)
+            if 'RUN' in act_type_str or 'RIDE' in act_type_str or 'WALK' in act_type_str or 'HIKE' in act_type_str:
+                filtered_activities.append(act)
+            if len(filtered_activities) >= 3:
+                break
         
-        if not runs:
-            draw.text((10, 10), "No recent runs", fill="black")
+        if not filtered_activities:
+            draw.text((10, 10), "No recent activities", fill="black")
             return img
         
-        # Each run gets 160px height (480/3)
-        run_height = height // 3
+        # Each activity gets 160px height (480/3)
+        activity_height = height // 3
         
-        for i, run in enumerate(runs):
-            y_start = i * run_height
+        for i, activity in enumerate(filtered_activities):
+            act_type_str = str(activity.type).upper()
+            is_ride = 'RIDE' in act_type_str
+            y_start = i * activity_height
             
-            # Draw separator line between runs
+            # Draw separator line between activities
             if i > 0:
                 draw.line([(0, y_start), (width, y_start)], fill="gray", width=1)
             
@@ -269,37 +305,41 @@ def get_runs_with_maps(width, height):
             stats_y = y_start + 10
             
             # Color indicator
-            draw.rectangle([(stats_x, stats_y), (stats_x + 4, stats_y + run_height -15)], fill=colors[i])
+            draw.rectangle([(stats_x, stats_y), (stats_x + 4, stats_y + activity_height -15)], fill=colors[i])
             
             # Date
-            date_str = run.start_date_local.strftime("%b %d")
+            date_str = activity.start_date_local.strftime("%b %d")
             draw.text((stats_x + 10, stats_y), date_str, fill="black")
             
             # Distance
-            distance_km = float(run.distance) / 1000
+            distance_km = float(activity.distance) / 1000
             draw.text((stats_x + 10, stats_y + 20), f"{distance_km:.2f}km", fill="gray")
             
             # Duration
-            total_seconds = int(run.moving_time)
+            total_seconds = int(activity.moving_time)
             minutes = total_seconds // 60
             seconds = total_seconds % 60
             draw.text((stats_x + 10, stats_y + 40), f"{minutes}:{seconds:02d}", fill="gray")
             
-            # Pace
+            # Pace/Speed
             if distance_km > 0:
-                pace_seconds = total_seconds / distance_km
-                pace_min = int(pace_seconds // 60)
-                pace_sec = int(pace_seconds % 60)
-                draw.text((stats_x + 10, stats_y + 60), f"{pace_min}:{pace_sec:02d}/km", fill="gray")
+                if is_ride:
+                    speed_kmh = distance_km / (total_seconds / 3600)
+                    draw.text((stats_x + 10, stats_y + 60), f"{speed_kmh:.1f}km/h", fill="gray")
+                else:
+                    pace_seconds = total_seconds / distance_km
+                    pace_min = int(pace_seconds // 60)
+                    pace_sec = int(pace_seconds % 60)
+                    draw.text((stats_x + 10, stats_y + 60), f"{pace_min}:{pace_sec:02d}/km", fill="gray")
             
             # Map section (right side, ~290px wide x 148px high)
             map_width = width - 110
-            map_height = run_height - 10
+            map_height = activity_height - 10
             
             try:
-                # Get map for this specific run
-                if run.map.summary_polyline:
-                    coordinates = polyline.decode(run.map.summary_polyline)
+                # Get map for this specific activity
+                if activity.map.summary_polyline:
+                    coordinates = polyline.decode(activity.map.summary_polyline)
                     
                     if coordinates:
                         # Draw only the route outline on a transparent background
@@ -313,7 +353,7 @@ def get_runs_with_maps(width, height):
                     draw.text((110, y_start + 20), "No map", fill="gray")
             except Exception as e:
                 draw.text((110, y_start + 20), "Map error", fill="red")
-                print(f"Map error for run {i+1}: {e}")
+                print(f"Map error for activity {i+1}: {e}")
         
     except Exception as e:
         draw.text((10, 10), f"Error: {str(e)[:50]}", fill="red")
