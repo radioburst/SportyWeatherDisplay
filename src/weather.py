@@ -222,7 +222,7 @@ def get_weather_data():
     weather_config = settings['openweather']
     API_KEY = weather_config['api_key']
     CITY = weather_config['city']
-    UNITS = weather_config['units']
+    UNITS = settings.get('units', 'metric')
     
     try:
         # Fetch current weather for coordinates
@@ -242,6 +242,9 @@ def get_weather_data():
         feels_like = current['main']['feels_like']
         humidity = current['main']['humidity']
         wind_speed = current['wind']['speed']
+        # Convert wind speed from m/s to km/h for metric units
+        if UNITS == 'metric':
+            wind_speed = wind_speed * 3.6
         pressure = current['main']['pressure']
         weather_main = current['weather'][0]['main']
         desc = current['weather'][0]['description'].capitalize()
@@ -314,7 +317,8 @@ def get_weather_data():
             'sunset_icon': get_icon_base64('sunset'),
             'moon_phase': moon_phase,
             'forecast': forecast_list,
-            'hourly': get_hourly_data(onecall)
+            'hourly': get_hourly_data(onecall),
+            'units': UNITS
         }
         
     except Exception as e:

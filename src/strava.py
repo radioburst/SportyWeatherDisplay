@@ -155,6 +155,10 @@ def get_activities_data():
     colors = ['#fc5200', '#2563eb', '#10b981'] 
     
     try:
+        settings = load_settings()
+        units = settings.get('units', 'metric')
+        is_imperial = units == 'imperial'
+        
         client = get_strava_client()
         
         # Fetch last activities and filter for Run and Ride
@@ -180,7 +184,13 @@ def get_activities_data():
             
             # Distance
             distance_km = float(activity.distance) / 1000
-            distance_str = f"{distance_km:.2f}km"
+            if is_imperial:
+                distance_miles = distance_km * 0.621371
+                distance_str = f"{distance_miles:.2f}mi"
+                distance_value = distance_miles
+            else:
+                distance_str = f"{distance_km:.2f}km"
+                distance_value = distance_km
             
             # Duration
             total_seconds = int(activity.moving_time)
@@ -189,23 +199,34 @@ def get_activities_data():
             duration_str = f"{minutes}:{seconds:02d}"
             
             # Pace/Speed
-            if distance_km > 0:
+            if distance_value > 0:
                 if is_ride:
-                    # Speed in km/h for rides
-                    speed_kmh = distance_km / (total_seconds / 3600)
-                    pace_str = f"{speed_kmh:.1f}km/h"
+                    # Speed for rides
+                    if is_imperial:
+                        speed_mph = distance_value / (total_seconds / 3600)
+                        pace_str = f"{speed_mph:.1f}mph"
+                    else:
+                        speed_kmh = distance_value / (total_seconds / 3600)
+                        pace_str = f"{speed_kmh:.1f}km/h"
                 else:
-                    # Pace in min/km for runs
-                    pace_seconds = total_seconds / distance_km
+                    # Pace for runs
+                    pace_seconds = total_seconds / distance_value
                     pace_min = int(pace_seconds // 60)
                     pace_sec = int(pace_seconds % 60)
-                    pace_str = f"{pace_min}:{pace_sec:02d}/km"
+                    if is_imperial:
+                        pace_str = f"{pace_min}:{pace_sec:02d}/mi"
+                    else:
+                        pace_str = f"{pace_min}:{pace_sec:02d}/km"
             else:
                 pace_str = "N/A"
             
             # Elevation gain
             elevation = int(activity.total_elevation_gain) if activity.total_elevation_gain else 0
-            elevation_str = f"{elevation}m"
+            if is_imperial:
+                elevation_ft = int(elevation * 3.28084)
+                elevation_str = f"{elevation_ft}ft"
+            else:
+                elevation_str = f"{elevation}m"
             
             # Kudos count
             kudos = activity.kudos_count if activity.kudos_count else 0

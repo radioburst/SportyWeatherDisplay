@@ -25,15 +25,17 @@
                     <img src="{{ weather.icon }}" alt="Weather" class="weather-icon">
                     <div class="temp-container">
                         <div>
-                            <span class="temp-display">{{ weather.temp }}</span><span
-                                class="temp-display-unit">°C</span>
+                            <span class="temp-display">{{ weather.temp }}</span><span class="temp-display-unit">°{% if
+                                weather.units == 'imperial' %}F{% else %}C{% endif %}</span>
                         </div>
                         <div class="feels-like">Feels like {{ weather.feels_like }}°</div>
                     </div>
                 </div>
                 <div class="weather-details-grid">
                     <div><img src="{{ weather.humidity_icon }}" class="detail-icon"> {{ weather.humidity }}%</div>
-                    <div><img src="{{ weather.wind_icon }}" class="detail-icon"> {{ weather.wind }} m/s</div>
+                    <div><img src="{{ weather.wind_icon }}" class="detail-icon"> {{ weather.wind|round(1) }} {% if
+                        weather.units
+                        == 'imperial' %}mph{% else %}km/h{% endif %}</div>
                     <div><img src="{{ weather.sunrise_icon }}" class="detail-icon"> {{ weather.sunrise }}</div>
                     <div><img src="{{ weather.pressure_icon }}" class="detail-icon"> {{ weather.pressure }} hPa</div>
                     <div><img src="{{ weather.aqi_icon }}" class="detail-icon"> {{ weather.airquality }}</div>
