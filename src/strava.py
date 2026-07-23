@@ -102,7 +102,7 @@ def draw_route_only(coordinates, width, height, color):
     min_lon, max_lon = min(lons), max(lons)
     
     # Add padding
-    padding = 15
+    padding = 10
     draw_width = width - 2 * padding
     draw_height = height - 2 * padding
     
@@ -138,7 +138,7 @@ def draw_route_only(coordinates, width, height, color):
     draw.line(points, fill=color, width=4, joint="round")
     
     # Draw start/end markers
-    r = 5
+    r = 4.5
     # Start (Green)
     s_x, s_y = points[0]
     draw.ellipse([s_x-r, s_y-r, s_x+r, s_y+r], fill="#00d46a", outline="black", width=1)
@@ -239,8 +239,9 @@ def get_activities_data():
                     coordinates = polyline.decode(activity.map.summary_polyline)
                     if coordinates:
                         # Draw only the route outline on a white background
-                        # Width is ~150px in the dashboard layout
-                        map_img = draw_route_only(coordinates, 150, 148, colors[i])
+                        # Width: panel(275) - borders(2) - stats margin(12) - stats width(100) = 161px
+                        # Height: entry(150) - borders(2) - header(27) = 121px
+                        map_img = draw_route_only(coordinates, 161, 121, colors[i])
                         
                         # Convert to base64
                         buffered = io.BytesIO()

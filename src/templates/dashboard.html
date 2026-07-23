@@ -79,14 +79,18 @@
         <div class="run-entry">
             <div class="run-header">
                 <img src="{{ activity.activity_icon }}" class="activity-icon">
-                <span class="run-date-name">{{ activity.date }} · {{ activity.name }}</span>
+                <span class="run-activity-name">{{ activity.name }}</span>
+                <span class="run-date">{{ activity.date }}</span>
             </div>
             <div class="run-body">
                 <div class="run-stats">
-                    <div class="stat"><img src="{{ activity.distance_icon }}" class="stat-icon"> {{ activity.distance }}</div>
-                    <div class="stat"><img src="{{ activity.duration_icon }}" class="stat-icon"> {{ activity.duration }}</div>
+                    <div class="stat"><img src="{{ activity.distance_icon }}" class="stat-icon"> {{ activity.distance }}
+                    </div>
+                    <div class="stat"><img src="{{ activity.duration_icon }}" class="stat-icon"> {{ activity.duration }}
+                    </div>
                     <div class="stat"><img src="{{ activity.pace_icon }}" class="stat-icon"> {{ activity.pace }}</div>
-                    <div class="stat"><img src="{{ activity.elevation_icon }}" class="stat-icon"> {{ activity.elevation }}</div>
+                    <div class="stat"><img src="{{ activity.elevation_icon }}" class="stat-icon"> {{ activity.elevation
+                        }}</div>
                 </div>
                 <div class="run-map">
                     {% if activity.map_path %}
