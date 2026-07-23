@@ -262,6 +262,7 @@ def get_activities_data():
             
             activities_data.append({
                 'date': date_str,
+                'name': activity.name,
                 'activity_icon': get_stat_icon(icon_name),
                 'distance': distance_str,
                 'distance_icon': get_stat_icon('distance'),
