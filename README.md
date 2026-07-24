@@ -4,7 +4,7 @@ A stylish E-ink Weather and Strava Dashboard ✨
 Displays weather forecasts and your recent Strava activities (including GPX routes) on an **Inky Impression 7.3" (2025 edition)** E-Ink Display. Powered by a Raspberry Pi Zero 2 W and housed in an IKEA RÖDALM picture frame, it creates a stylish, high-contrast dashboard for your home. ✒️ 🖼️
 
 
-<img src="images/example2.jpg" width="850" alt="example img">
+<img src="images/example1.jpg" width="850" alt="example img">
 
 ## Features ⚡️
 
@@ -71,7 +71,7 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for complete deployment instructions.
 
 Edit `settings.json`:
 - **OpenWeather API**: Get key from [openweathermap.org](https://openweathermap.org/api)
-- **Strava API**: Create app at [strava.com/settings/api](https://www.strava.com/settings/api)
+- **Strava API**: Create app at [strava.com/settings/api](https://www.strava.com/settings/api) (Requires Strava Subscription)
 - **Location**: Latitude/longitude for weather
 
 ## 3D Printed Mounts 🖨️
@@ -104,3 +104,13 @@ SportyWeatherDisplay/
 ## License
 
 See [LICENSE](LICENSE)
+
+## Gallery
+
+<img src="images/example2.jpg" width="850" alt="example img">
+
+<img src="images/back1.jpg" width="850" alt="example img">
+
+<img src="images/back2.jpg" width="850" alt="example img">
+
+<img src="images/preview.png" width="850" alt="example img">
