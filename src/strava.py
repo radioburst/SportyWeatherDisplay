@@ -285,6 +285,64 @@ def get_activities_data():
         print(f"Strava error: {e}")
         return []
 
+def get_monthly_stats():
+    """Get recent (last 4 weeks) ride and run totals from Strava athlete stats"""
+    try:
+        client = get_strava_client()
+        athlete = client.get_athlete()
+        stats = client.get_athlete_stats(athlete.id)
+
+        settings = load_settings()
+        is_imperial = settings.get('units', 'metric') == 'imperial'
+
+        rides = stats.recent_ride_totals
+        runs = stats.recent_run_totals
+
+        def to_meters(val):
+            try:
+                return float(val)
+            except Exception:
+                return 0.0
+
+        def to_seconds(val):
+            try:
+                if hasattr(val, 'total_seconds'):
+                    return int(val.total_seconds())
+                return int(val)
+            except Exception:
+                return 0
+
+        ride_m = to_meters(rides.distance) if rides else 0
+        run_m = to_meters(runs.distance) if runs else 0
+
+        if ride_m == 0 and run_m == 0:
+            return None
+
+        def fmt_dist(meters):
+            if is_imperial:
+                return f"{meters / 1609.34:.1f}mi"
+            return f"{meters / 1000:.1f}km"
+
+        def fmt_time(seconds):
+            h = seconds // 3600
+            m = (seconds % 3600) // 60
+            return f"{h}h {m:02d}m" if h > 0 else f"{m}m"
+
+        return {
+            'ride_distance': fmt_dist(ride_m),
+            'ride_time': fmt_time(to_seconds(rides.moving_time) if rides else 0),
+            'run_distance': fmt_dist(run_m),
+            'run_time': fmt_time(to_seconds(runs.moving_time) if runs else 0),
+            'ride_icon': get_stat_icon('ride'),
+            'run_icon': get_stat_icon('run'),
+            'distance_icon': get_stat_icon('distance'),
+            'time_icon': get_stat_icon('time'),
+        }
+
+    except Exception as e:
+        print(f"Monthly stats error: {e}")
+        return None
+
 def get_activities_with_maps(width, height):
     """Display last 3 activities (runs and rides) with stats and individual maps for each"""
     img = Image.new("RGB", (width, height), "white")

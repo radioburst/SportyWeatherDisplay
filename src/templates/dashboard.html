@@ -59,16 +59,49 @@
 
         <div class="forecast-section">
             <div class="forecast-days">
-                {% for day in weather.forecast %}
-                <div class="forecast-day">
-                    <div class="day-name">{{ day.name }}</div>
-                    <img src="{{ day.icon }}" alt="Weather" class="day-icon">
-                    <div class="day-temp">{{ day.max }}° / {{ day.min }}°</div>
-                    <div class="moon-phase-day">
-                        <img src="{{ day.moon_icon }}" class="moon-icon"> {{ day.moon_phase }}%
+                {% if monthly_stats %}
+                    {% for day in weather.forecast[:3] %}
+                    <div class="forecast-day">
+                        <div class="day-name">{{ day.name }}</div>
+                        <img src="{{ day.icon }}" alt="Weather" class="day-icon">
+                        <div class="day-temp">{{ day.max }}° / {{ day.min }}°</div>
+                        <div class="moon-phase-day">
+                            <img src="{{ day.moon_icon }}" class="moon-icon"> {{ day.moon_phase }}%
+                        </div>
                     </div>
-                </div>
-                {% endfor %}
+                    {% endfor %}
+                    <div class="forecast-day monthly-tile">
+                        <div class="monthly-sport-row">
+                            <img src="{{ monthly_stats.ride_icon }}" class="stat-icon"> Total
+                        </div>
+                        <div class="monthly-stat-row">
+                            <img src="{{ monthly_stats.distance_icon }}" class="stat-icon"> {{ monthly_stats.ride_distance }}
+                        </div>
+                        <div class="monthly-stat-row">
+                            <img src="{{ monthly_stats.time_icon }}" class="stat-icon"> {{ monthly_stats.ride_time }}
+                        </div>
+                        <div class="monthly-sport-row monthly-run-section">
+                            <img src="{{ monthly_stats.run_icon }}" class="stat-icon"> Total
+                        </div>
+                        <div class="monthly-stat-row">
+                            <img src="{{ monthly_stats.distance_icon }}" class="stat-icon"> {{ monthly_stats.run_distance }}
+                        </div>
+                        <div class="monthly-stat-row">
+                            <img src="{{ monthly_stats.time_icon }}" class="stat-icon"> {{ monthly_stats.run_time }}
+                        </div>
+                    </div>
+                {% else %}
+                    {% for day in weather.forecast %}
+                    <div class="forecast-day">
+                        <div class="day-name">{{ day.name }}</div>
+                        <img src="{{ day.icon }}" alt="Weather" class="day-icon">
+                        <div class="day-temp">{{ day.max }}° / {{ day.min }}°</div>
+                        <div class="moon-phase-day">
+                            <img src="{{ day.moon_icon }}" class="moon-icon"> {{ day.moon_phase }}%
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
             </div>
         </div>
     </div>
